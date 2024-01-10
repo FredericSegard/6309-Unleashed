@@ -1,0 +1,63 @@
+%SIGNAL
+PIN   5 =  A0 
+PIN   6 =  A1 
+PIN   7 =  A2 
+PIN   8 =  A3 
+PIN   9 =  A4 
+PIN  10 =  A5 
+PIN  11 =  A6 
+PIN  13 =  A7 
+PIN   1 =  CLK_E 
+PIN   2 =  CLK_Q 
+PIN  22 = !INTCTRL 
+PIN   4 = !IORQ 
+PIN  19 = !PIA1 
+PIN  18 = !PIA2 
+PIN  23 = !ROMDIS 
+PIN   3 =  RW 
+PIN  21 = !UART1 
+PIN  20 = !UART2 
+%END
+
+%FIELD
+FIELD ADDRESS = A7,A6,A5,A4,A3,A2,A1,A0
+%END
+
+%EQUATION
+INTCTRL =>
+    A0 & !A1 & !A2 & A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & !IORQ & RW
+
+PIA1 =>
+    !A2 & !A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & !IORQ
+
+PIA2 =>
+    !A2 & !A3 & !A4 & A5 & !A6 & !A7 & CLK_E & !IORQ
+
+ROMDIS =>
+    !A0 & !A1 & !A2 & A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & !IORQ & !RW
+
+UART1 =>
+    A2 & !A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & !IORQ
+
+UART2 =>
+    A2 & !A3 & !A4 & A5 & !A6 & !A7 & CLK_E & !IORQ
+
+INTCTRL.oe  =>
+    1 
+
+PIA1.oe  =>
+    1 
+
+PIA2.oe  =>
+    1 
+
+ROMDIS.oe  =>
+    1 
+
+UART1.oe  =>
+    1 
+
+UART2.oe  =>
+    1 
+
+%END
