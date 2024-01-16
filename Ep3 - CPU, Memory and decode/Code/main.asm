@@ -1,4 +1,4 @@
-
+;
 ;         ::::::::       ::::::::       :::::::       :::::::: 
 ;       :+:    :+:     :+:    :+:     :+:   :+:     :+:    :+: 
 ;      +:+                   +:+     +:+   +:+     +:+    +:+  
@@ -6,8 +6,8 @@
 ;    +#+    +#+            +#+     +#+   +#+            +#+    
 ;   #+#    #+#     #+#    #+#     #+#   #+#     #+#    #+#     
 ;   ########       ########       #######       ########       
-
-; *********************************************************************************************************************
+;
+; ****************************************************************************************
 ; * 6309 project, code named LogicSpark-09
 ; *
 ; * https://www.youtube.com/@microhobbyist
@@ -15,16 +15,18 @@
 ; *
 ; * Copyright (C) 2024 Frédéric Segard (MicroHobbyist)
 ; *
-; * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General
-; * Public License as published by the Free Software Foundation. You can use all or part of the code, regardless of
-; * the version. But there is no warrenty of any kind.
+; * This library is free software; you can redistribute it and/or modify it under the
+; * terms of the GNU Lesser General Public License as published by the Free Software
+; * Foundation. You can use all or part of the code, regardless of the version. But there
+; * is no warrenty of any kind.
 ; *
 ; * Reference:	ASCII text: https://www.messletters.com/en/big-text/ (alligator, standard)
 ; *				Editor tab-stops set to 4
-; *				Assembler: VASM  (vasm6809_oldstyle -6309 -dotdir -chklabels -nocase %1.asm -Fbin -o %1.out -L %1.txt)
+; *				Assembler: VASM  (vasm6809_oldstyle) 
+; *				Args: -6309 -dotdir -chklabels -nocase %1.asm -Fbin -o %1.bin -L %1.txt)
 ; *
 ; * Version 0.1 (Jan 10th 2024)
-; *********************************************************************************************************************
+; ****************************************************************************************
 
 
 ; ---------------
@@ -35,11 +37,11 @@
 ;--------------
 RomDisable		= $FF08			; ROM disable (poke any value)
 
-; ---------------------------------------------------------------------------------------------------------------------
+; ----------------------------------------------------------------------------------------
 
 	org		$0000
 
-RESET:
+Reset:
 
 	orcc	#$50				; Disable interrupts, just in case
 	ldmd	#$01				; Begin processing in 6309 native mode
@@ -69,12 +71,12 @@ ShadowCopy:
 	sta		RomDisable			; Poke any value to disable the ROM
 	jmp		Init
 
-ShadowCopyEnd:
+ShadowEnd:
 
-	ds		Init-ShadowCopyEnd,$FF ; Fill memory with $FF for rapid programming
+	ds		Init-ShadowEnd,$FF	; Fill memory with $FF for rapid programming
 
 
-; ---------------------------------------------------------------------------------------------------------------------
+; ----------------------------------------------------------------------------------------
 
 	org		$8000
 
@@ -87,8 +89,8 @@ InitEnd:
 
 	ds		Vectors-InitEnd,$FF	; Fill memory with $FF for rapid programming
 
-; ---------------------------------------------------------------------------------------------------------------------
 
+; ----------------------------------------------------------------------------------------
 
 ; ---------------
 ; *** VECTORS ***
@@ -97,14 +99,14 @@ InitEnd:
 	org		$FFF0
 
 Vectors:
-	dw		$0000	; Illegal Opcode and Division by Zero Trap (exception)
-	dw		$0000	; SWI3
-	dw		$0000	; SWI2
-	dw		$0000	; SWI
-	dw		$0000	; FIRQ
-	dw		$0000	; IRQ
-	dw		$0000	; NMI
-	dw		$RESET	; RESET
+	dw		$0000		; Illegal Opcode and Division by Zero Trap (exception)
+	dw		$0000		; SWI3
+	dw		$0000		; SWI2
+	dw		$0000		; SWI
+	dw		$0000		; FIRQ
+	dw		$0000		; IRQ
+	dw		$0000		; NMI
+	dw		Reset		; RESET
 
 	end
 

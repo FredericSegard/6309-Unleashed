@@ -10,7 +10,7 @@
     (rev "1.0")
     (company "Frédéric Segard")
     (comment 1 "MicroHobbyist")
-    (comment 2 "www.microhobbyist.com")
+    (comment 2 "microhobbyist.com")
   )
 
   (lib_symbols
