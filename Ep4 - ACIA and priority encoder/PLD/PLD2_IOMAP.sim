@@ -7,16 +7,20 @@ PIN   9 =  A4
 PIN  10 =  A5 
 PIN  11 =  A6 
 PIN  13 =  A7 
+PIN  21 = !ACIA1 
+PIN  20 = !ACIA2 
 PIN   1 =  CLK_E 
 PIN   2 =  CLK_Q 
 PIN  22 = !INTCTRL 
 PIN   4 = !IORQ 
-PIN  19 = !PIA1 
-PIN  18 = !PIA2 
+PIN  15 = !LCD 
+PIN  18 = !PIA1 
+PIN  17 = !PIA2 
+PIN  19 = !PTM 
 PIN  23 = !ROMDIS 
 PIN   3 =  RW 
-PIN  21 = !UART1 
-PIN  20 = !UART2 
+PIN  14 = !SD 
+PIN  16 = !VDG 
 %END
 
 %FIELD
@@ -24,23 +28,44 @@ FIELD ADDRESS = A7,A6,A5,A4,A3,A2,A1,A0
 %END
 
 %EQUATION
+ACIA1 =>
+    !A2 & A3 & !A4 & A5 & A6 & !A7 & !IORQ
+
+ACIA2 =>
+    A2 & A3 & !A4 & A5 & A6 & !A7 & !IORQ
+
 INTCTRL =>
     A0 & !A1 & !A2 & A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & !IORQ & RW
 
+LCD1 =>
+    !A0 & A1 & !A2 & A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & IORQ
+
+LCD2 =>
+    A0 & A1 & !A2 & A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & IORQ
+
 PIA1 =>
-    !A2 & !A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & !IORQ
+    !A2 & !A3 & !A4 & !A5 & !A6 & !A7 & !IORQ
 
 PIA2 =>
-    !A2 & !A3 & !A4 & A5 & !A6 & !A7 & CLK_E & !IORQ
+    !A2 & !A3 & !A4 & A5 & !A6 & !A7 & !IORQ
+
+PTM =>
+    !A3 & A4 & !A5 & !A6 & !A7 & !IORQ
 
 ROMDIS =>
     !A0 & !A1 & !A2 & A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & !IORQ & !RW
 
-UART1 =>
-    A2 & !A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & !IORQ
+SD =>
+    A1 & A2 & A3 & !A4 & !A5 & !A6 & !A7 & CLK_E & !IORQ
 
-UART2 =>
-    A2 & !A3 & !A4 & A5 & !A6 & !A7 & CLK_E & !IORQ
+VDG =>
+    !A5 & A6 & A7 & !IORQ
+
+ACIA1.oe  =>
+    1 
+
+ACIA2.oe  =>
+    1 
 
 INTCTRL.oe  =>
     1 
@@ -51,13 +76,16 @@ PIA1.oe  =>
 PIA2.oe  =>
     1 
 
+PTM.oe  =>
+    1 
+
 ROMDIS.oe  =>
     1 
 
-UART1.oe  =>
+SD.oe  =>
     1 
 
-UART2.oe  =>
+VDG.oe  =>
     1 
 
 %END

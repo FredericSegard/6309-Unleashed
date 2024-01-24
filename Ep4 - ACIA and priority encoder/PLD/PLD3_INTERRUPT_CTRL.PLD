@@ -1,0 +1,55 @@
+Name     PLD3_INTERRUPT_CTRL ;
+PartNo   ATF16V8B ;
+Date     2024 / 01 / 16 ;
+Revision 02 ;
+Designer Frederic Segard ;
+Company  MicroHobbyist ;
+Assembly None ;
+Location U13 ;
+Device   G16V8 ;
+
+/* *************** INPUT PINS **********************/
+PIN 1   = I1 ;    /* Interrupt 1                   */
+PIN 2   = I2 ;    /* Interrupt 2                   */
+PIN 3   = I3 ;    /* Interrupt 3                   */
+PIN 4   = I4 ;    /* Interrupt 4                   */
+PIN 5   = I5 ;    /* Interrupt 5                   */
+PIN 6   = I6 ;    /* Interrupt 6                   */
+PIN 7   = I7 ;    /* Interrupt 7                   */
+PIN 8   = I8 ;    /* Interrupt 8                   */
+PIN 9   = I9 ;    /* Interrupt 9                   */
+PIN 11  = I10 ;   /* Interrupt 11                  */
+PIN 12  = I11 ;   /* Interrupt 11                  */
+PIN 13  = I12 ;   /* Interrupt 12                  */
+
+
+/* *************** OUTPUT PINS *********************/
+PIN 19  = IRQ ;   /* IRQ to CPU                    */
+PIN 18  = FIRQ ;  /* FIRQ to CPU                   */
+PIN 17  = V1 ;    /* Vector bit 1                  */
+PIN 16  = V2 ;    /* Vector bit 2                  */
+PIN 15  = V3 ;    /* Vector bit 3                  */
+PIN 14  = V4 ;    /* Vector bit 4                  */
+
+
+/* *************** EQUATIONS ***********************/
+FIELD IRQIN  = [I12..I1] ; /* Interrupt level      */
+FIELD VECTOR = [V4..V1] ;  /* Vector bits 1 to 4   */
+TABLE IRQIN  => VECTOR {
+'b'111111111111 => 'b'0000 ;
+'b'xxxxxxxxxxx0 => 'b'0001 ;
+'b'xxxxxxxxxx01 => 'b'0010 ;
+'b'xxxxxxxxx011 => 'b'0011 ;
+'b'xxxxxxxx0111 => 'b'0100 ;
+'b'xxxxxxx01111 => 'b'0101 ;
+'b'xxxxxx011111 => 'b'0110 ;
+'b'xxxxx0111111 => 'b'0111 ;
+'b'xxxx01111111 => 'b'1000 ;
+'b'xxx011111111 => 'b'1001 ;
+'b'xx0111111111 => 'b'1010 ;
+'b'x01111111111 => 'b'1011 ;
+'b'011111111111 => 'b'1100 ;
+}
+
+IRQ   =  I1 & I2 & I3 & I4 & I5 & I6 & I7 & I8 & I9 & I10 & I11 & I12;
+FIRQ  =  'b'1;

@@ -1,7 +1,7 @@
 
 CUPL(WM)        5.0a  Serial# 60008009
 Device          g22v10  Library DLIB-h-40-1
-Created         Sun Jan 21 11:35:52 2024
+Created         Sun Jan 21 11:21:18 2024
 Name            PLD1_MemoryMap 
 Partno          ATF22V10C 
 Revision        1 
@@ -68,4 +68,5 @@ Location        U9
 *L05824 01010100000101010100010001100011
 *L05856 00100011001001010110001100010011
 *CA201
-*F5F1
+*P 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+*

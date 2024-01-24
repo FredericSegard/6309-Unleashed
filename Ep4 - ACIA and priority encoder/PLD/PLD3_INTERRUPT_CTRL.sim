@@ -1,0 +1,59 @@
+%SIGNAL
+PIN  18 =  FIRQ 
+PIN   1 =  I1 
+PIN   2 =  I2 
+PIN   3 =  I3 
+PIN   4 =  I4 
+PIN   5 =  I5 
+PIN   6 =  I6 
+PIN   7 =  I7 
+PIN   8 =  I8 
+PIN   9 =  I9 
+PIN  11 =  I10 
+PIN  12 =  I11 
+PIN  13 =  I12 
+PIN  19 =  IRQ 
+PIN  17 =  V1 
+PIN  16 =  V2 
+PIN  15 =  V3 
+PIN  14 =  V4 
+%END
+
+%FIELD
+FIELD IRQIN = I12,I11,I10,I9,I8,I7,I6,I5,I4,I3,I2,I1
+FIELD VECTOR = V4,V3,V2,V1
+%END
+
+%EQUATION
+FIRQ =>
+    1 
+
+IRQ =>
+    I1 & I2 & I3 & I4 & I5 & I6 & I7 & I8 & I9 & I10 & I11 & I12
+
+V1 =>
+    I1 & I2 & I3 & I4 & I5 & I6 & I7 & I8 & I9 & !I10 & !I12
+  # !I1 & !I12
+  # I1 & !I2 & !I12
+  # I1 & I2 & I3 & I4 & !I5 & !I12
+  # I1 & I2 & I3 & I4 & I5 & !I6 & !I12
+  # I1 & I2 & I3 & I4 & I5 & I6 & I7 & I8 & !I9 & !I12
+
+V2 =>
+    I1 & I2 & I3 & I4 & I5 & I6 & I7 & I8 & I9 & I10 & !I11 & !I12
+  # I1 & I2 & !I3 & !I12
+  # I1 & I2 & I3 & !I4 & !I12
+  # I1 & I2 & I3 & I4 & !I5 & !I12
+  # I1 & I2 & I3 & I4 & I5 & !I6 & !I12
+
+V3 =>
+    I1 & I2 & I3 & I4 & I5 & I6 & I7 & I8 & I9 & I10 & !I11 & !I12
+  # I1 & I2 & I3 & I4 & I5 & I6 & !I7 & !I12
+  # I1 & I2 & I3 & I4 & I5 & I6 & I7 & !I8 & !I12
+  # I1 & I2 & I3 & I4 & I5 & I6 & I7 & I8 & !I9 & !I12
+  # I1 & I2 & I3 & I4 & I5 & I6 & I7 & I8 & I9 & !I10 & !I12
+
+V4 =>
+    0 
+
+%END

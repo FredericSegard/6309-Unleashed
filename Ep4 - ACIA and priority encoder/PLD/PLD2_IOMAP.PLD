@@ -1,12 +1,13 @@
 Name      PLD2_IOMap ;
 PartNo    ATF22V10C ;
-Date      2023-01-08 ;
-Revision  1 ;
+Date      08/01/2023 ;
+Revision  1.1 ;
 Designer  Frederic Segard ;
 Company   MicroHobbyist ;
 Assembly  None ;
 Location  U11 ;
 Device    g22v10 ;
+
 
 /***************** INPUT PINS **********************************/
 PIN 1   = CLK_E    ; /* Quadrature E Clock                     */
@@ -21,19 +22,32 @@ PIN 9   = A4       ; /* Address bus                            */
 PIN 10  = A5       ; /* Address bus                            */
 PIN 11  = A6       ; /* Address bus                            */
 PIN 13  = A7       ; /* Address bus                            */
-/***************************************************************/
+
 
 /***************** OUTPUT PINS *********************************/
 PIN 23  = !ROMDIS  ; /* Disable ROM after it's copied to RAM   */
-/***************************************************************/
+PIN 22  = !INTCTRL ; /* Priority Interrupt Controller          */
+PIN 21  = !ACIA1   ; /* Primary ACIA (MC68B50)                 */
+PIN 20  = !ACIA2   ; /* Secondary ACIA (MC68B50)               */
+PIN 19  = !PTM     ; /* Programmable Timer Module (MC68B40)    */
+PIN 18  = !PIA1    ; /* Primary PIA (MC68B21)                  */
+PIN 17  = !PIA2    ; /* Secondary PIA (MC68B21)                */
+PIN 16  = !VDG     ; /* Video Display Generator (MC6847)       */
+PIN 15  = !LCD     ; /* 40x4 LCD **TBD                         */
+PIN 14  = !SD      ; /* SD card (CH376)                        */
+
 
 /***************** EQUATIONS ***********************************/
 FIELD ADDRESS = [A7..A0] ;
 
-ROMDIS  =  ADDRESS:[08] & IORQ & !RW & CLK_E ;  /* $FF08       */
-
-
-
-
-
-
+PIA1    = ADDRESS:[00..03] & IORQ ;             /* $FF00-$FF03 */
+ROMDIS  = ADDRESS:[08] & IORQ & !RW & CLK_E ;   /* $FF08       */
+INTCTRL = ADDRESS:[09] & IORQ &  RW & CLK_E ;   /* $FF09       */
+LCD1    = ADDRESS:[0A] & IORQ       & CLK_E ;   /* $FF0A       */
+LCD2    = ADDRESS:[0B] & IORQ       & CLK_E ;   /* $FF0B       */
+SD      = ADDRESS:[0E..0F] & IORQ   & CLK_E ;   /* $FF0E-$FF0F */
+PTM     = ADDRESS:[10..17] & IORQ ;             /* $FF10-$FF17 */
+PIA2    = ADDRESS:[20..23] & IORQ ;             /* $FF20-$FF23 */
+ACIA1   = ADDRESS:[68..6B] & IORQ ;             /* $FF68-$FF6B */
+ACIA2   = ADDRESS:[6C..6F] & IORQ ;             /* $FF3C-$FF3F */
+VDG     = ADDRESS:[C0..DF] & IORQ ;             /* $FFC0-$FFDF */
