@@ -25,17 +25,26 @@
 ; *				Assembler: VASM  (vasm6809_oldstyle) 
 ; *				Args: -6309 -dotdir -chklabels -nocase %1.asm -Fbin -o %1.bin -L %1.txt)
 ; *
-; * Version 0.1 (Jan 10th 2024)
+; * Version 0.2 (Jan 17th 2024)
 ; ****************************************************************************************
-
 
 ; ---------------
 ; *** EQUATES ***
 ; ---------------
 
+; Keystrokes
+; ----------
+NULL	=	$00					; End delimiter
+BS		=	$08					; Backspace
+TAB		=	$09					; Horizontal Tab
+CR		=	$0D					; Carriage return
+LF		=	$0A					; Line feed
+ESC		=	$1B					; Escape
+
 ; I/O addresses
-;--------------
-RomDisable		= $FF08			; ROM disable (poke any value)
+; -------------
+RomDisable	= $FF08				; ROM disable (poke any value)
+IntVector	= $FF09				; Priority Interrupt Controller (reads a vector value)
 
 ; ----------------------------------------------------------------------------------------
 
@@ -45,7 +54,6 @@ Reset:
 
 	orcc	#$50				; Disable interrupts, just in case
 	ldmd	#$01				; Begin processing in 6309 native mode
-
 
 ; -------------------
 ; *** SHADOW COPY ***
@@ -72,51 +80,127 @@ ShadowCopy:
 	jmp		Init
 
 ShadowEnd:
-
 	ds		Init-ShadowEnd,$FF	; Fill memory with $FF for rapid programming
 
-
 ; ----------------------------------------------------------------------------------------
 
-	org		$8000
-
+	org		$E000
 
 Init:
-	bra		Init				; Currently does nothing. WiP
+	lds		#$E000-1			; Sets the system stack
+	jsr		Com1Init			; Initialize ACIA1
 
+	;jsr		Cls					; Clears the screen
+	ldx		#WelcomeMsg			; Message to print
+StrLoop:
+	lda		,X+					; Read character pointed by X, then increments X
+	beq		Main				; End routine if end of string (null) has been reached
+
+NotReady:
+	ldb		Com1_Status			; Load the status register
+	andb	#%00010000			; Is the transmit buffer full?
+	beq		NotReady			; Yes, then check until it's empty
+	sta		Com1_Data			; Send out the character
 	
-InitEnd:
+	bra		StrLoop				; Get the next character
 
-	ds		Vectors-InitEnd,$FF	; Fill memory with $FF for rapid programming
+;	jsr		OutStr				; Print the above message
+
+Main:
+	bra		Main
+
+;  ___                  _               _              
+; |_ _|  _ __     ___  | |  _   _    __| |   ___   ___ 
+;  | |  | '_ \   / __| | | | | | |  / _` |  / _ \ / __|
+;  | |  | | | | | (__  | | | |_| | | (_| | |  __/ \__ \
+; |___| |_| |_|  \___| |_|  \__,_|  \__,_|  \___| |___/
+;
+; Include files to segment code and data into manageable portions
+; ---------------------------------------------------------------
+
+	include "convert.asm"		; Conversion subroutines
+	include "io.asm"			; Input and Output subroutines
+	include	"data.asm"			; Keep data include file at the end of the list
+
+IncEnd:
+	ds	InStrBuffer-IncEnd,$FF	; Fill memory with $FF for rapid programming
 
 
+;  ____                   __     __                 _           _       _
+; / ___|   _   _   ___    \ \   / /   __ _   _ __  (_)   __ _  | |__   | |   ___   ___ 
+; \___ \  | | | | / __|    \ \ / /   / _` | | '__| | |  / _` | | '_ \  | |  / _ \ / __|
+;  ___) | | |_| | \__ \     \ V /   | (_| | | |    | | | (_| | | |_) | | | |  __/ \__ \
+; |____/   \__, | |___/      \_/     \__,_| |_|    |_|  \__,_| |_.__/  |_|  \___| |___/
+;          |___/
+;
+; System variables used by system subroutines
+; -------------------------------------------
+
+InStrBuffer:	ds	$FF,0		; String input for console input
+InStrLen:		ds	$2,0		; String length limit for InString routine
+TempWord:		ds	$2,0		; Temporary 16-bit local storage
+
+SysVarEnd:
+	ds	IllegalDiv0-SysVarEnd,$FF	; Fill memory with $FF for rapid programming
+
+
+;  ___           _                                          _         
+; |_ _|  _ __   | |_    ___   _ __   _ __   _   _   _ __   | |_   ___ 
+;  | |  | '_ \  | __|  / _ \ | '__| | '__| | | | | | '_ \  | __| / __|
+;  | |  | | | | | |_  |  __/ | |    | |    | |_| | | |_) | | |_  \__ \
+; |___| |_| |_|  \__|  \___| |_|    |_|     \__,_| | .__/   \__| |___/
+;                                                  |_|
 ; ----------------------------------------------------------------------------------------
 
-; ---------------
-; *** VECTORS ***
-; ---------------
+IllegalDiv0:
+	rti
+	
+SoftInt3:
+	rti
+	
+SoftInt2:
+	rti
+	
+SoftInt1:
+	rti
+	
+FIRQ:
+	rti
 
-	org		$FFF0
+IRQ:
+	rti
 
-Vectors:
-	dw		$0000		; Illegal Opcode and Division by Zero Trap (exception)
-	dw		$0000		; SWI3
-	dw		$0000		; SWI2
-	dw		$0000		; SWI
-	dw		$0000		; FIRQ
-	dw		$0000		; IRQ
-	dw		$0000		; NMI
-	dw		Reset		; RESET
+NMI:
+	rti
+
+IntEnd:
+	ds	ConstRAM-IntEnd,$FF	; Fill memory with $FF for rapid programming
+
+;   ____                         _                     _   
+;  / ___|   ___    _ __    ___  | |_    __ _   _ __   | |_ 
+; | |      / _ \  | '_ \  / __| | __|  / _` | | '_ \  | __|
+; | |___  | (_) | | | | | \__ \ | |_  | (_| | | | | | | |_ 
+;  \____|  \___/  |_| |_| |___/  \__|  \__,_| |_| |_|  \__|
+;
+; This range is considered constant to all upper 8th block in a RAM banking system
+; --------------------------------------------------------------------------------
+
+	org	$FE00				; Constant range used in bank switching ($FE00-$FFFF)
+
+ConstRAM:					; Constant RAM ($FE00-$FEFF)
+	ds		256,$00			; Zero constant RAM region 
+
+InputOutputRange:			; I/O range ($FF00-$FFEF)
+	ds		240,$10			; Filled with $10 to represent IO (Will not be shadow copied)
+
+Vectors:					; Reset and Interrupt vectors ($FFF0-$FFFF)
+	dw		IllegalDiv0		; Illegal Opcode and Division by Zero Trap (6309 only)
+	dw		SoftInt3		; SWI3
+	dw		SoftInt2		; SWI2
+	dw		SoftInt1		; SWI
+	dw		FIRQ			; FIRQ
+	dw		IRQ				; IRQ
+	dw		NMI				; NMI
+	dw		Reset			; RESET
 
 	end
-
-
-
-
-
-
-
-
-
-
-
