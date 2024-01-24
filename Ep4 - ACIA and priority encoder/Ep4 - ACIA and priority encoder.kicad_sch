@@ -2302,7 +2302,7 @@
   (symbol (lib_id "Device:R_US") (at 85.09 125.73 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 04618155-fd3f-41ad-8c2e-b0bf8543c1ae)
-    (property "Reference" "R2" (at 87.63 124.46 0)
+    (property "Reference" "R1" (at 87.63 124.46 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "330" (at 87.63 127 0)
@@ -2319,7 +2319,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "R2") (unit 1)
+          (reference "R1") (unit 1)
         )
       )
     )
@@ -2543,7 +2543,7 @@
   (symbol (lib_id "power:VCC") (at 175.26 96.52 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 2c8dde6a-afda-47c4-ad1b-8a13de14b420)
-    (property "Reference" "#PWR029" (at 175.26 92.71 0)
+    (property "Reference" "#PWR028" (at 175.26 92.71 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 175.26 100.33 0)
@@ -2559,7 +2559,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR029") (unit 1)
+          (reference "#PWR028") (unit 1)
         )
       )
     )
@@ -2593,7 +2593,7 @@
   (symbol (lib_id "power:GND") (at 87.63 69.85 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 3190bf2b-2b58-48db-b429-b3952ac84240)
-    (property "Reference" "#PWR016" (at 87.63 76.2 0)
+    (property "Reference" "#PWR017" (at 87.63 76.2 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 87.63 73.66 0)
@@ -2609,7 +2609,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR016") (unit 1)
+          (reference "#PWR017") (unit 1)
         )
       )
     )
@@ -2771,7 +2771,7 @@
   (symbol (lib_id "power:VCC") (at 87.63 45.72 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 4dd3c7e1-8168-4b25-bbd8-66b2fc29dae2)
-    (property "Reference" "#PWR015" (at 87.63 49.53 0)
+    (property "Reference" "#PWR016" (at 87.63 49.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 87.63 41.91 0)
@@ -2787,7 +2787,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR015") (unit 1)
+          (reference "#PWR016") (unit 1)
         )
       )
     )
@@ -2862,7 +2862,7 @@
   (symbol (lib_id "Device:LED") (at 87.63 54.61 270) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 55702242-33cd-4c47-b6f2-7ed01fd48b8d)
-    (property "Reference" "D1" (at 90.17 52.07 90)
+    (property "Reference" "D2" (at 90.17 52.07 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "PWR LED" (at 90.17 54.61 90)
@@ -2882,7 +2882,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "D1") (unit 1)
+          (reference "D2") (unit 1)
         )
       )
     )
@@ -2943,7 +2943,7 @@
   (symbol (lib_id "power:VCC") (at 152.4 81.28 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 645439bd-eb8f-48d3-9949-5a6c137ce181)
-    (property "Reference" "#PWR024" (at 152.4 85.09 0)
+    (property "Reference" "#PWR023" (at 152.4 85.09 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 152.4 77.47 0)
@@ -2959,7 +2959,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR024") (unit 1)
+          (reference "#PWR023") (unit 1)
         )
       )
     )
@@ -3125,7 +3125,7 @@
   (symbol (lib_id "power:GND") (at 85.09 132.08 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 76e055f2-0d5b-49b1-b4d7-9431bc030e26)
-    (property "Reference" "#PWR017" (at 85.09 138.43 0)
+    (property "Reference" "#PWR015" (at 85.09 138.43 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 85.09 135.89 0)
@@ -3141,7 +3141,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR017") (unit 1)
+          (reference "#PWR015") (unit 1)
         )
       )
     )
@@ -3175,7 +3175,7 @@
   (symbol (lib_id "power:VCC") (at 165.1 166.37 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 7bffc2a8-e1f9-46b8-8edf-79b8ff7bb2de)
-    (property "Reference" "#PWR025" (at 165.1 170.18 0)
+    (property "Reference" "#PWR024" (at 165.1 170.18 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 165.1 162.56 0)
@@ -3191,7 +3191,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR025") (unit 1)
+          (reference "#PWR024") (unit 1)
         )
       )
     )
@@ -3200,7 +3200,7 @@
   (symbol (lib_id "power:VCC") (at 175.26 50.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 8311447b-ff75-4ce6-bcee-a7b290f405d1)
-    (property "Reference" "#PWR027" (at 175.26 54.61 0)
+    (property "Reference" "#PWR026" (at 175.26 54.61 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 175.26 46.99 0)
@@ -3216,7 +3216,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR027") (unit 1)
+          (reference "#PWR026") (unit 1)
         )
       )
     )
@@ -3364,7 +3364,7 @@
   (symbol (lib_id "power:VCC") (at 54.61 172.72 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 9db79e3a-0505-431f-8592-067ad68768f4)
-    (property "Reference" "#PWR010" (at 54.61 176.53 0)
+    (property "Reference" "#PWR09" (at 54.61 176.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 54.61 168.91 0)
@@ -3380,7 +3380,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR010") (unit 1)
+          (reference "#PWR09") (unit 1)
         )
       )
     )
@@ -3454,7 +3454,7 @@
   (symbol (lib_id "power:VCC") (at 175.26 66.04 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a19fb00b-4b5b-4327-a95e-b02c4deb9f1d)
-    (property "Reference" "#PWR028" (at 175.26 62.23 0)
+    (property "Reference" "#PWR027" (at 175.26 62.23 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 175.26 69.85 0)
@@ -3470,7 +3470,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR028") (unit 1)
+          (reference "#PWR027") (unit 1)
         )
       )
     )
@@ -3504,7 +3504,7 @@
   (symbol (lib_id "Device:LED") (at 85.09 116.84 270) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a3fd97c7-3159-4474-b912-a3b3ff54672f)
-    (property "Reference" "D2" (at 87.63 114.3 90)
+    (property "Reference" "D1" (at 87.63 114.3 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "PWR LED" (at 87.63 116.84 90)
@@ -3524,7 +3524,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "D2") (unit 1)
+          (reference "D1") (unit 1)
         )
       )
     )
@@ -3533,7 +3533,7 @@
   (symbol (lib_id "power:GND") (at 54.61 198.12 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a5b33fa0-99a8-4ac6-a2c3-ea128cd37cbc)
-    (property "Reference" "#PWR011" (at 54.61 204.47 0)
+    (property "Reference" "#PWR010" (at 54.61 204.47 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 54.61 201.93 0)
@@ -3549,7 +3549,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR011") (unit 1)
+          (reference "#PWR010") (unit 1)
         )
       )
     )
@@ -3813,7 +3813,7 @@
   (symbol (lib_id "74xx:74LS10") (at 20.32 185.42 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ded5537a-ec94-4ddc-988c-25d9d89de231)
-    (property "Reference" "U13" (at 20.32 184.15 0)
+    (property "Reference" "U1" (at 20.32 184.15 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HCT10" (at 20.32 186.69 0)
@@ -3842,7 +3842,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "U13") (unit 4)
+          (reference "U1") (unit 4)
         )
       )
     )
@@ -3851,7 +3851,7 @@
   (symbol (lib_id "74xx:74LS10") (at 153.67 55.88 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid dfc9ddba-3ccf-4942-8f79-7ad4c2d8de6f)
-    (property "Reference" "U13" (at 152.4 50.8 0)
+    (property "Reference" "U1" (at 152.4 50.8 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HCT10" (at 153.67 60.96 0)
@@ -3880,7 +3880,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "U13") (unit 1)
+          (reference "U1") (unit 1)
         )
       )
     )
@@ -3939,7 +3939,7 @@
   (symbol (lib_id "power:GND") (at 55.88 58.42 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid e9bb7569-57c7-4368-b7f2-ecfbedc107a7)
-    (property "Reference" "#PWR09" (at 55.88 64.77 0)
+    (property "Reference" "#PWR011" (at 55.88 64.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 55.88 62.23 0)
@@ -3955,7 +3955,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR09") (unit 1)
+          (reference "#PWR011") (unit 1)
         )
       )
     )
@@ -4004,7 +4004,7 @@
   (symbol (lib_id "74xx:74LS10") (at 113.03 191.77 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid eff9358f-2158-4c6b-bd50-9cce5481d7ad)
-    (property "Reference" "U13" (at 111.76 186.69 0)
+    (property "Reference" "U1" (at 111.76 186.69 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HCT10" (at 113.03 196.85 0)
@@ -4033,7 +4033,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "U13") (unit 3)
+          (reference "U1") (unit 3)
         )
       )
     )
@@ -4067,7 +4067,7 @@
   (symbol (lib_id "Device:R_US") (at 87.63 63.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f2dfb9b1-4c2c-4917-bec7-d1b0b8c217b9)
-    (property "Reference" "R1" (at 90.17 62.23 0)
+    (property "Reference" "R2" (at 90.17 62.23 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "220" (at 90.17 64.77 0)
@@ -4084,7 +4084,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "R1") (unit 1)
+          (reference "R2") (unit 1)
         )
       )
     )
@@ -4093,7 +4093,7 @@
   (symbol (lib_id "power:GND") (at 165.1 179.07 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f30f19d4-1a0a-4fe4-b3df-06ac358a0e55)
-    (property "Reference" "#PWR026" (at 165.1 185.42 0)
+    (property "Reference" "#PWR025" (at 165.1 185.42 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 165.1 182.88 0)
@@ -4109,7 +4109,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "#PWR026") (unit 1)
+          (reference "#PWR025") (unit 1)
         )
       )
     )
@@ -4118,7 +4118,7 @@
   (symbol (lib_id "74xx:74LS10") (at 113.03 179.07 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f73e742b-516d-4c63-8575-aac78364353d)
-    (property "Reference" "U13" (at 111.76 173.99 0)
+    (property "Reference" "U1" (at 111.76 173.99 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HCT10" (at 113.03 184.15 0)
@@ -4147,7 +4147,7 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81"
-          (reference "U13") (unit 2)
+          (reference "U1") (unit 2)
         )
       )
     )
@@ -4209,10 +4209,10 @@
     (stroke (width 0.1524) (type solid))
     (fill (color 0 0 0 0.0000))
     (uuid 1eecc9b4-ef9d-4356-8203-d2ade9bbd6fa)
-    (property "Sheetname" "ACIA + PIA" (at 234.95 43.7384 0)
+    (property "Sheetname" "Priority Interrupt Encoder" (at 234.95 43.7384 0)
       (effects (font (size 1.27 1.27)) (justify left bottom))
     )
-    (property "Sheetfile" "AciaPia.kicad_sch" (at 234.95 69.1646 0)
+    (property "Sheetfile" "Interrupt.kicad_sch" (at 234.95 69.1646 0)
       (effects (font (size 1.27 1.27)) (justify left top) hide)
     )
     (instances
@@ -4235,6 +4235,23 @@
     (instances
       (project "Ep4 - ACIA and priority encoder"
         (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81" (page "2"))
+      )
+    )
+  )
+
+  (sheet (at 236.22 72.39) (size 29.21 24.13) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid d30b2c50-de85-46b5-a5df-0104b05c2311)
+    (property "Sheetname" "ACIA 1" (at 236.22 71.6784 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "Acia1.kicad_sch" (at 236.22 97.1046 0)
+      (effects (font (size 1.27 1.27)) (justify left top) hide)
+    )
+    (instances
+      (project "Ep4 - ACIA and priority encoder"
+        (path "/f10554f6-1aa2-49fd-b6d1-b55857380e81" (page "4"))
       )
     )
   )

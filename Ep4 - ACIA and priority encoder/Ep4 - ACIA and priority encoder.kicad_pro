@@ -333,7 +333,11 @@
     ],
     [
       "1eecc9b4-ef9d-4356-8203-d2ade9bbd6fa",
-      "ACIA + PIA"
+      "Priority Interrupt Encoder"
+    ],
+    [
+      "d30b2c50-de85-46b5-a5df-0104b05c2311",
+      "ACIA 1"
     ]
   ],
   "text_variables": {}
