@@ -218,17 +218,71 @@ DelCharLoop:
 
 GetStrByte:
 	pshs	B
-	jsr		GetStrNibble		; Convert ASCII to hex nibble
-	bcc		GetStrByteEnd		; End routine if nibble is invalid
+	pshsw
+	pshs	X					; Save position
+	clrb						; Clear byte counter
+	clrf						; Clear byte storage
+GetStrByteCount:
+	lda		,X+					; Load a character
+	beq		GetStrByteParse		; If it's the end of the string, parse byte
+	cmpa	#' '				; Is it a space delimiter
+	beq		GetStrByteParse		; Yes, then parse byte
+	incb						; Increment byte counter
+	bra		GetStrByteCount		; Loop till delimiter found
+GetStrByteParse:
+	puls	X					; Restore position
+	cmpb	#0					; Is the counter = 0
+	beq		GetStrByteError		; Yes, then set error flag
+	cmpb	#1					; Is it 1 character long
+	bne		GetStrByteParse2	; No, then check if it's 2
+	jsr		GetStrNibble		; Get a nibble
+	bcc		GetStrByteError		; If it's not a valid hex digit, then set error flag
+	bra		GetStrByteGood		; Exit indicating that it's a valid hex digit
+GetStrByteParse2:
+	cmpb	#2					; Is it 2 character long
+	bne		GetStrByteParseMore	; No, then check if it's 3
+	jsr		GetStrNibble		; Get a nibble
+	bcc		GetStrByteError		; If it's not a valid hex digit, then set error flag
 	asla						; Push nibble to MSB
 	asla						;
 	asla						;
 	asla						;
-	tfr		A,B					; Save A in B
-	jsr		GetStrNibble		; Convert ASCII to hex nibble
-	bcc		GetStrByteEnd		; End routine if nibble is invalid
-	orr		B,A					; Join MSB and LSB into A
+	tfr		A,B					; Store byte in LSB of W
+	jsr		GetStrNibble		; Get a nibble
+	bcc		GetStrByteError		; If it's not a valid hex digit, then set error flag
+	orr		B,A					; Merge both nibbles as a byte
+	bra		GetStrByteGood		; Exit indicating that it's a valid hex digit
+GetStrByteParseMore:
+	lda		CmdErrorPtr			; Load error pointer
+	adda	#3					; Add 3 to it
+	sta		CmdErrorPtr			; Store it back
+	bra		GetStrByteError		; Set error flag
+GetStrByteGood:
+	orcc	#%00000001			; Set Carry: Indicates the byte is ok
+	bra		GetStrByteEnd
+GetStrByteError:
+	andcc	#%11111110			; Clear Carry: Indicates there an error
 GetStrByteEnd:
+	pulsw
+	puls	B,PC
+
+GetStrByteFixed:
+	pshs	B
+	jsr		GetStrNibble		; Get a nibble
+	bcc		GetStrByteFixedErr	; If it's not a valid hex digit, then set error flag
+	asla						; Push nibble to MSB
+	asla						;
+	asla						;
+	asla						;
+	tfr		A,B					; Store byte in B
+	jsr		GetStrNibble		; Get a nibble
+	bcc		GetStrByteFixedErr	; If it's not a valid hex digit, then set error flag
+	orr		B,A					; Merge both nibbles as a byte
+	orcc	#%00000001			; Set Carry: Indicates the nibble is ok
+	bra		GetStrByteFixedEnd	;
+GetStrByteFixedErr:
+	andcc	#%11111110			; Clear Carry: Indicates there an error
+GetStrByteFixedEnd:
 	puls	B,PC
 
 ;   ____          _     ____    _            _   _   _   _       _       _        
@@ -286,6 +340,7 @@ GetStrNibbleEnd:
 ;			Carry Set = hex digit is valid in D
 
 GetStrWord:
+	pshsw
 	pshs	X					; Save position
 	clrb						; Clear word counter
 	clrw						; Clear word storage
@@ -301,56 +356,51 @@ GetStrWordParse:
 	cmpb	#0					; Is the counter = 0
 	beq		GetStrWordError		; Yes, then set error flag
 	cmpb	#1					; Is it 1 character long
-	bne		GetWordParse2		; No, then check if it's 2
+	bne		GetStrWordParse2	; No, then check if it's 2
 	jsr		GetStrNibble		; Get a nibble
 	bcc		GetStrWordError		; If it's not a valid hex digit, then set error flag
 	tfr		A,F					; Store nibble in LSB of W
 	bra		GetStrWordGood		; Exit indicating that it's a valid hex digit
-GetWordParse2:
+GetStrWordParse2:
 	cmpb	#2					; Is it 2 character long
-	bne		GetWordParse3		; No, then check if it's 3
-	jsr		GetStrByte			; Get a byte
+	bne		GetStrWordParse3	; No, then check if it's 3
+	jsr		GetStrByteFixed		; Get a byte
 	bcc		GetStrWordError		; If it's not a valid hex digit, then set error flag
-	tfr		A,F					; Store nibble in LSB of W
+	tfr		A,F					; Store byte in LSB of W
 	bra		GetStrWordGood		; Exit indicating that it's a valid hex digit
-GetWordParse3:
+GetStrWordParse3:
 	cmpb	#3					; Is it 3 character long
-	bne		GetWordParse4		; No, then check if it's 4
+	bne		GetStrWordParse4	; No, then check if it's 4
 	jsr		GetStrNibble		; Get a nibble
 	bcc		GetStrWordError		; If it's not a valid hex digit, then set error flag
-	tfr		A,E					; Store nibble in LSB of W
-	jsr		GetStrByte			; Get a byte
+	tfr		A,E					; Store nibble in MSB of W
+	jsr		GetStrByteFixed		; Get a byte
 	bcc		GetStrWordError		; If it's not a valid hex digit, then set error flag
-	tfr		A,F					; Store nibble in LSB of W
+	tfr		A,F					; Store byte in LSB of W
 	bra		GetStrWordGood		; Exit indicating that it's a valid hex digit
-GetWordParse4:
+GetStrWordParse4:
 	cmpb	#4					; Is it 4 character long
-	bne		GetWordParseMore	; No, then check if it's longer
-	jsr		GetStrByte			; Get a byte
+	bne		GetStrWordParseMore	; No, then check if it's longer
+	jsr		GetStrByteFixed		; Get a byte
 	bcc		GetStrWordError		; If it's not a valid hex digit, then set error flag
-	tfr		A,E					; Store nibble in LSB of W
-	jsr		GetStrByte			; Get a byte
+	tfr		A,E					; Store byte in MSB of W
+	jsr		GetStrByteFixed		; Get a byte
 	bcc		GetStrWordError		; If it's not a valid hex digit, then set error flag
-	tfr		A,F					; Store nibble in LSB of W
+	tfr		A,F					; Store byte in LSB of W
 	bra		GetStrWordGood		; Exit indicating that it's a valid hex digit
-GetWordParseMore:
-	
+GetStrWordParseMore:
+	lda		CmdErrorPtr			; Load error pointer
+	adda	#5					; Add 5 to it
+	sta		CmdErrorPtr			; Store it back
+	bra		GetStrWordError		; Set error flag
 GetStrWordGood:
+	tfr		W,D
 	orcc	#%00000001			; Set Carry: Indicates the word is ok
 	bra		GetStrWordEnd
 GetStrWordError:
 	andcc	#%11111110			; Clear Carry: Indicates there an error
 GetStrWordEnd:
-	rts
-
-
-	jsr		GetStrByte			; Get MSB of word
-	bcc		GetStrWordEnd		; If its an invalid byte, exit
-	tfr		A,B					; Save MSB in B
-	jsr		GetStrByte			; Get LSB of word
-	bcc		GetStrWordEnd		; If its an invalid byte, exit
-	exg		A,B					; Swap A and B
-GetStrWordEnd:
+	pulsw
 	rts
 
 ;  ___           ____            _          
