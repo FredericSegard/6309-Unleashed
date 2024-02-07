@@ -159,54 +159,48 @@ BinToAscWord:
 
 ; Convert a 16-bit word binary number to up to five BCD numbers
 ; -------------------------------------------------------------
-; Input:	D = 16-bit binary data (word)
+; Input:	D = 16-bit binary data (To be coded: 24 bit)
 ; Output:	Q = 32-bit BCD data
 
 	PRAGMA cc
 
 BinToBcd:
-	pshs	A,B,X,CC
-	pshsw
+	pshs	CC
+	clr		TempQ1				; Clear Q's High MSB byte
+	clrw						; Clear Q's MSB
 	; Calculate 10,000's digit
-	ldx		#10000				; Load 10000 diviser
-	stx		,-S					; Save to stack
-	divq	,S+					; Divide Q by 10,000 (from stack): Quotient in W, Remainder in D
-	stf		,X+					; Save 10,000's digit to variable pointed by X
+	exg		W,D					; Q = DW
+	divq	#10000				; Divide Q by 10,000: Quotient in W, Remainder in D
+	stw		TempQ2				; Save 10,000's digit to variable
 	; Calculate 1,000's digit
-	ldx		#1000				; Load 1000 diviser
-	stx		,-S					; Save to stack
-	divq	,S+					; Divide Q by 1,000 (from stack): Quotient in W, Remainder in D
-	exg		D,W					; Exchange registers (Quotien is now in D, and remainder in W)
+	tfr		D,W					; Transfer Remainder to LSB
+	clrd						; Clear MSB
+	divq	#1000				; Divide Q by 1,000: Quotient in W, Remainder in D
+	exg		D,W					; Exchange registers: Quotien is now in D, and remainder in W
 	lsld						; Move 1,000's digit to high nibble
 	lsld						;	Had to exchange D <-> W
 	lsld						;	in order for lsld to work
 	lsld						;
-	stb		,-S					; Save 1,000's digit in the stack for later addition
+	stb		TempQ3				; Save 1,000's digit for later or'ing with the 100's
 	; Calculate 100's digit
-	lda		#100				; Load 100
-	sta		,-S					; Store it in the stack
-	clra						; Clear MSB of D
 	tfr		W,D					; Transfer remainder to D
-	divd	,S+					; Divide D by 100 (from stack): Quotient in B, Remainder in A
-	addb	,S+					; Add 1000's and 100's digit together
-	stb		,X+					; Save 100's and 100's digit to variable pointed by X
+	divd	#100				; Divide D by 100: Quotient in B, Remainder in A
+	pshs	A					; Save for 10's and 1's 
+	lda		TempQ3				; Load quotien from the 1000's
+	orr		B,A					; Merge 1000's and 100's digits together
+	sta		TempQ3				; Save result to variable
 	; Calculate the 10's and 1's digit
-	tfr		A,B					; Place remainder in LSB of D
-	lda		#10					; Load 10
-	sta		,-S					; Store it in the stack
+	puls	B					; Place remainder in LSB of D
 	clra						; Clear MSB of D
-	divd	,S+					; Divide D by 10 (from stack): Quotient in B, Remainder in A
+	divd	#10					; Divide D by 10: Quotient in B, Remainder in A
 	lslb						; Move 10's digit to high nibble
 	lslb						;
 	lslb						;
 	lslb						;
-	sta		,-S					; Save the remainder in the stack
-	addb	,S+					; Add remainder from the stack with quotient
-	stb		,X+					; Save 10's and 1's digits to variable pointed by X
-	lda		#EOD				; Load end of data code
-	sta		,X					; Insert End Of Data marker without advancing pointer
-	pulsw
-	puls	A,B,X,CC,PC
+	orr		B,A					; Merge 10's and 1's digits together
+	sta		TempQ4				; Save result to Variable
+	ldq		TempQuad			; Load Quad result
+	puls	CC,PC
 
 ;  _   _                                  ____                      
 ; | | | |  _ __    _ __     ___   _ __   / ___|   __ _   ___    ___ 

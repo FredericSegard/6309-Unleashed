@@ -361,6 +361,7 @@ LoadEOF:
 LoadCheckFlag:
 	cmpf	#$80				; Was there any checksum errors?
 	beq		LoadSuccess			; If no errors, then print success
+	jsr		OutCRLF				; Change line
 	ldx		#LoadFailedErr		; Print download failed
 	jsr		OutStr				;
 	bra		LoadEnd				;
@@ -372,6 +373,7 @@ LoadSuccess:
 	std		,X++				; Store it at the end of code
 	lda		#$39				; Save opcode "rts"
 	sta		,X					; Store it at the end of code to return to prompt
+	jsr		OutCRLF				; Change line
 	ldx		#LoadSuccessMsg		; Print success message
 	jsr		OutStr
 LoadEnd:

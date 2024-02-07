@@ -23,28 +23,37 @@
      FD2C             (         test.asm):00023         BinToBcd        EQU     $FD2C
      FD2E             (         test.asm):00024         UpperCase       EQU     $FD2E
                       (         test.asm):00025         
-                      (         test.asm):00026             PRAGMA cd                   ; Detailed cycle count
-                      (         test.asm):00027             PRAGMA ct                   ; Cycle count running subtotal
-                      (         test.asm):00028                     
-                      (         test.asm):00029                     ORG $1000
-                      (         test.asm):00030                 
-1000                  (         test.asm):00031                 Start:
-1000 CC1234           (         test.asm):00032 (3)     3           ldd     #$1234
-1003 10865678         (         test.asm):00033 (4)     7           ldw     #$5678
-1007 8EAAAA           (         test.asm):00034 (3)     10          ldx     #$AAAA
-100A 108EBBBB         (         test.asm):00035 (4)     14          ldy     #$BBBB
-100E AD9FFD1A         (         test.asm):00036 (6+5)   25          jsr     [OutNibble]
-1012 AD9FFD18         (         test.asm):00037 (6+5)   36          jsr     [OutCRLF]
-1016 AD9FFD16         (         test.asm):00038 (6+5)   47          jsr     [OutByte]
-101A AD9FFD18         (         test.asm):00039 (6+5)   58          jsr     [OutCRLF]
-101E AD9FFD1E         (         test.asm):00040 (6+5)   69          jsr     [OutWord]
-1022 AD9FFD18         (         test.asm):00041 (6+5)   80          jsr     [OutCRLF]
-1026 12               (         test.asm):00042 (1)     81          nop
-1027 12               (         test.asm):00043 (1)     82          nop
-1028 12               (         test.asm):00044 (1)     83          nop
-1029 12               (         test.asm):00045 (1)     84          nop
-                      (         test.asm):00046                     
-                      (         test.asm):00047                     END
+     0000             (         test.asm):00026         EOD             EQU     0
+                      (         test.asm):00027         
+                      (         test.asm):00028             PRAGMA cd                   ; Detailed cycle count
+                      (         test.asm):00029             PRAGMA ct                   ; Cycle count running subtotal
+                      (         test.asm):00030                     
+                      (         test.asm):00031                     ORG $1000
+                      (         test.asm):00032                 
+1000                  (         test.asm):00033                 Start:
+1000 FC102C           (         test.asm):00034 (5)     5           ldd     Data1
+1003 AD9FFD2C         (         test.asm):00035 (6+5)   16          jsr     [BinToBcd]
+1007 AD9FFD1E         (         test.asm):00036 (6+5)   27          jsr     [OutWord]
+100B 1E60             (         test.asm):00037 (5)     32          exg     W,D
+100D AD9FFD1E         (         test.asm):00038 (6+5)   43          jsr     [OutWord]
+1011 AD9FFD18         (         test.asm):00039 (6+5)   54          jsr     [OutCRLF]
+                      (         test.asm):00040                 
+1015 FC102E           (         test.asm):00041 (5)     59          ldd     Data2
+1018 AD9FFD2C         (         test.asm):00042 (6+5)   70          jsr     [BinToBcd]
+101C AD9FFD1E         (         test.asm):00043 (6+5)   81          jsr     [OutWord]
+1020 1E60             (         test.asm):00044 (5)     86          exg     W,D
+1022 AD9FFD1E         (         test.asm):00045 (6+5)   97          jsr     [OutWord]
+1026 AD9FFD18         (         test.asm):00046 (6+5)   108         jsr     [OutCRLF]
+                      (         test.asm):00047                 
+102A 2004             (         test.asm):00048 (3)     111         bra     PrgEnd
+                      (         test.asm):00049                 
+102C 0400             (         test.asm):00050                 Data1:      .dw     1024
+102E FB00             (         test.asm):00051                 Data2:      .dw     64256
+                      (         test.asm):00052                 
+1030                  (         test.asm):00053                 PrgEnd:
+                      (         test.asm):00054                     
+                      (         test.asm):00055                     
+                      (         test.asm):00056                     END
 
 Symbol Table:
 [ G] AscToBinByte                     FD22
@@ -55,7 +64,10 @@ Symbol Table:
 [ G] BinToAscWord                     FD2A
 [ G] BinToBcd                         FD2C
 [ G] Cls                              FD00
+[ G] Data1                            102C
+[ G] Data2                            102E
 [ G] DelChar                          FD02
+[ G] EOD                              0000
 [ G] GetStrByte                       FD04
 [ G] GetStrNibble                     FD06
 [ G] GetStrWord                       FD08
@@ -70,5 +82,6 @@ Symbol Table:
 [ G] OutNibble                        FD1A
 [ G] OutStr                           FD1C
 [ G] OutWord                          FD1E
+[ G] PrgEnd                           1030
 [ G] Start                            1000
 [ G] UpperCase                        FD2E

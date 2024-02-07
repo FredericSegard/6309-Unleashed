@@ -23,25 +23,34 @@ BinToAscWord	EQU		$FD2A
 BinToBcd		EQU		$FD2C
 UpperCase		EQU		$FD2E
 
+EOD				EQU		0
+
 	PRAGMA cd					; Detailed cycle count
 	PRAGMA ct					; Cycle count running subtotal
 	
 	ORG $1000
 
 Start:
-	ldd		#$1234
-	ldw		#$5678
-	ldx		#$AAAA
-	ldy		#$BBBB
-	jsr		[OutNibble]
-	jsr		[OutCRLF]
-	jsr		[OutByte]
-	jsr		[OutCRLF]
+	ldd		Data1
+	jsr		[BinToBcd]
+	jsr		[OutWord]
+	exg		W,D
 	jsr		[OutWord]
 	jsr		[OutCRLF]
-	nop
-	nop
-	nop
-	nop
+
+	ldd		Data2
+	jsr		[BinToBcd]
+	jsr		[OutWord]
+	exg		W,D
+	jsr		[OutWord]
+	jsr		[OutCRLF]
+
+	bra		PrgEnd
+
+Data1:		.dw		1024
+Data2:		.dw		64256
+
+PrgEnd:
+	
 	
 	END

@@ -432,8 +432,8 @@ InByte:
 ; |___| |_| |_| |____/   \__| |_|
 ;
 ;
-; Read string from from input device
-; ==================================
+; Read string from from stdin
+; ===========================
 ; Reg used:	E = current number of bytes counter
 ;			F = contains the original max number of bytes to read
 ;			Y = contains the original string pointer start
@@ -515,7 +515,7 @@ InStrEnd:
 ;
 ; Read a hexadecimal word
 ; =======================
-; Output:	D = Binary number converted from two ASCII characters read from stdin
+; Output:	D = Binary number converted from four ASCII characters read from stdin
 ; 
 	PRAGMA cc
 
