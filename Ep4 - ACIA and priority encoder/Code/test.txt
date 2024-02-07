@@ -1,0 +1,74 @@
+     FD00             (         test.asm):00001         Cls             EQU     $FD00
+     FD02             (         test.asm):00002         DelChar         EQU     $FD02
+     FD04             (         test.asm):00003         GetStrByte      EQU     $FD04
+     FD06             (         test.asm):00004         GetStrNibble    EQU     $FD06
+     FD08             (         test.asm):00005         GetStrWord      EQU     $FD08
+     FD0A             (         test.asm):00006         InByte          EQU     $FD0A
+     FD0C             (         test.asm):00007         InChar          EQU     $FD0C
+     FD0E             (         test.asm):00008         InCharNW        EQU     $FD0E
+     FD10             (         test.asm):00009         InStr           EQU     $FD10
+     FD12             (         test.asm):00010         InWord          EQU     $FD12
+     FD14             (         test.asm):00011         OutChar         EQU     $FD14
+     FD16             (         test.asm):00012         OutByte         EQU     $FD16
+     FD18             (         test.asm):00013         OutCRLF         EQU     $FD18
+     FD1A             (         test.asm):00014         OutNibble       EQU     $FD1A
+     FD1C             (         test.asm):00015         OutStr          EQU     $FD1C
+     FD1E             (         test.asm):00016         OutWord         EQU     $FD1E
+     FD20             (         test.asm):00017         AscToBinNibble  EQU     $FD20
+     FD22             (         test.asm):00018         AscToBinByte    EQU     $FD22
+     FD24             (         test.asm):00019         AscToBinWord    EQU     $FD24
+     FD26             (         test.asm):00020         BinToAscNibble  EQU     $FD26
+     FD28             (         test.asm):00021         BinToAscByte    EQU     $FD28
+     FD2A             (         test.asm):00022         BinToAscWord    EQU     $FD2A
+     FD2C             (         test.asm):00023         BinToBcd        EQU     $FD2C
+     FD2E             (         test.asm):00024         UpperCase       EQU     $FD2E
+                      (         test.asm):00025         
+                      (         test.asm):00026             PRAGMA cd                   ; Detailed cycle count
+                      (         test.asm):00027             PRAGMA ct                   ; Cycle count running subtotal
+                      (         test.asm):00028                     
+                      (         test.asm):00029                     ORG $1000
+                      (         test.asm):00030                 
+1000                  (         test.asm):00031                 Start:
+1000 CC1234           (         test.asm):00032 (3)     3           ldd     #$1234
+1003 10865678         (         test.asm):00033 (4)     7           ldw     #$5678
+1007 8EAAAA           (         test.asm):00034 (3)     10          ldx     #$AAAA
+100A 108EBBBB         (         test.asm):00035 (4)     14          ldy     #$BBBB
+100E AD9FFD1A         (         test.asm):00036 (6+5)   25          jsr     [OutNibble]
+1012 AD9FFD18         (         test.asm):00037 (6+5)   36          jsr     [OutCRLF]
+1016 AD9FFD16         (         test.asm):00038 (6+5)   47          jsr     [OutByte]
+101A AD9FFD18         (         test.asm):00039 (6+5)   58          jsr     [OutCRLF]
+101E AD9FFD1E         (         test.asm):00040 (6+5)   69          jsr     [OutWord]
+1022 AD9FFD18         (         test.asm):00041 (6+5)   80          jsr     [OutCRLF]
+1026 12               (         test.asm):00042 (1)     81          nop
+1027 12               (         test.asm):00043 (1)     82          nop
+1028 12               (         test.asm):00044 (1)     83          nop
+1029 12               (         test.asm):00045 (1)     84          nop
+                      (         test.asm):00046                     
+                      (         test.asm):00047                     END
+
+Symbol Table:
+[ G] AscToBinByte                     FD22
+[ G] AscToBinNibble                   FD20
+[ G] AscToBinWord                     FD24
+[ G] BinToAscByte                     FD28
+[ G] BinToAscNibble                   FD26
+[ G] BinToAscWord                     FD2A
+[ G] BinToBcd                         FD2C
+[ G] Cls                              FD00
+[ G] DelChar                          FD02
+[ G] GetStrByte                       FD04
+[ G] GetStrNibble                     FD06
+[ G] GetStrWord                       FD08
+[ G] InByte                           FD0A
+[ G] InChar                           FD0C
+[ G] InCharNW                         FD0E
+[ G] InStr                            FD10
+[ G] InWord                           FD12
+[ G] OutByte                          FD16
+[ G] OutChar                          FD14
+[ G] OutCRLF                          FD18
+[ G] OutNibble                        FD1A
+[ G] OutStr                           FD1C
+[ G] OutWord                          FD1E
+[ G] Start                            1000
+[ G] UpperCase                        FD2E
