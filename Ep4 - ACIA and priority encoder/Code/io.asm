@@ -533,7 +533,51 @@ InWord:
 	jsr		AscToBinWord
 	pulsw
 	puls	CC,PC
-	
+
+;   ___            _     ____               _ 
+;  / _ \   _   _  | |_  | __ )    ___    __| |
+; | | | | | | | | | __| |  _ \   / __|  / _` |
+; | |_| | | |_| | | |_  | |_) | | (__  | (_| |
+;  \___/   \__,_|  \__| |____/   \___|  \__,_|
+;
+;
+; Output BCD data, removing leading zeros
+; =======================================
+; Input:	Q = Data to print (ABEF)
+
+OutBcd:
+	clrb						; B = 0 indicates to skip leading LSB 0
+	jsr		OutBcdSub			; Process A
+	tfr		B,A
+	jsr		OutBcdSub			; Process B
+	tfr		E,A
+	jsr		OutBcdSub			; Process E
+	tfr		F,A
+	ldb		#$01				; B = 1 indicates to keep the last 0 in LSB
+	jsr		OutBcdSub			; Process F
+	rts
+
+OutBcdSub:
+	pshs	A					; Save A for LSB
+	lsra						; Shift MSB to LSB
+	lsra						;
+	lsra						;
+	lsra						;
+	tsta						; Check A
+	beq		OutBcdSubLSB		; If it's 0, skip printing, and check LSB
+	jsr		OutNibble
+OutBcdSubLSB:
+	puls	A
+	anda	#$0F
+	tstb						; Check if LSB 0 is to be printed
+	bne		OutBcdSubLSB
+	tsta
+	beq		OutBcdSubEnd
+OutBcdSubLSB:
+	jsr		OutNibble
+OutBcdSubEnd:
+	rts
+
 ;   ___            _     ____            _          
 ;  / _ \   _   _  | |_  | __ )   _   _  | |_    ___ 
 ; | | | | | | | | | __| |  _ \  | | | | | __|  / _ \

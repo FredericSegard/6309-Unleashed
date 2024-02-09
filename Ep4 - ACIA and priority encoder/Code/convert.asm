@@ -159,7 +159,7 @@ BinToAscWord:
 
 ; Convert a 16-bit word binary number to up to five BCD numbers
 ; -------------------------------------------------------------
-; Input:	D = 16-bit binary data (To be coded: 24 bit)
+; Input:	D = 16-bit binary data
 ; Output:	Q = 32-bit BCD data
 
 	PRAGMA cc
@@ -167,11 +167,11 @@ BinToAscWord:
 BinToBcd:
 	pshs	CC
 	clr		TempQ1				; Clear Q's High MSB byte
-	clrw						; Clear Q's MSB
 	; Calculate 10,000's digit
-	exg		W,D					; Q = DW
+	tfr		D,W					; Q = DW
+	clrd						; Clear Q's MSB
 	divq	#10000				; Divide Q by 10,000: Quotient in W, Remainder in D
-	stw		TempQ2				; Save 10,000's digit to variable
+	stf		TempQ2				; Save 10,000's digit to variable
 	; Calculate 1,000's digit
 	tfr		D,W					; Transfer Remainder to LSB
 	clrd						; Clear MSB

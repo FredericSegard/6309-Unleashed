@@ -131,10 +131,12 @@ Init:
 	jsr		OutWordNLZ			;
 	jsr		OutStr				;
 	ldd		#RomStart			; Free RAM available
-	jsr		OutWord
+	jsr		BinToBcd			; Convert to BCD
+	jsr		OutBcd
 	jsr		OutStr
 	ldd		#JmpStart-VarEnd	; Free shadow RAM left
-	jsr		OutWord
+	jsr		BinToBcd			; Convert to BCD
+	jsr		OutBcd
 	jsr		OutStr
 
 	; Clear the registers
@@ -302,6 +304,7 @@ JmpBinToAscByte:	.DW		BinToAscByte
 JmpBinToAscWord:	.DW		BinToAscWord
 JmpBinToBcd:		.DW		BinToBcd
 JmpUpperCase:		.DW		UpperCase
+JmpOutBcd:			.DW		OutBcd
 JmpTableEnd:
 
 	FILL 'J',ConstRAM-JmpTableEnd ; Clear area with $00

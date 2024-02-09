@@ -12,9 +12,9 @@ BootMsg:	;                                        *                       *     
 	.str	"LogicSpark-09, a 6309 project, rev "
 	.db		NULL,CR,LF
 	.str	"Designed by Frederic Segard  (2024)"
-	.db		CR,LF,LF,'$',NULL
+	.db		CR,LF,LF,NULL
 	.str	" bytes free "
-	.db		CR,LF,'$',NULL
+	.db		CR,LF,NULL
 	.str	" bytes of unallocated shadow RAM"
 	.db		CR,LF
 	.str	"----------------------------------------"

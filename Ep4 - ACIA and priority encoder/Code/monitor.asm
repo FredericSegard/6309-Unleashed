@@ -1,8 +1,8 @@
 ; ****************************************************************************************
 ; * Subroutines			IN			OUT			Description
 ; * --------------------------------------------------------------------------------------
-; * CmdErrors
-; *   ErrPointer
+; * CmdErrors			.			.			
+; *   ErrPointer								Print the error location
 ; *   ErrInvalidAddress
 ; *   ErrInvalidByte
 ; *   ErrInvalidCommand
@@ -12,9 +12,18 @@
 ; * CmdHelp  			.			.			List of monitor commands
 ; * CmdParse			X			.			Parse the command string
 ; * CmdPrompt			.			X			Print the command prompt
+; * Dump				X			.			Dumps the contents of memory
 ; * LoadIntelHex		.			.			Intel Hex loader
 ; * MemoryMap			.			.			Print memory and I/O map
+; * Peek				X			.			Read a byte from a memory location
+; * Poke				X			.			Write a byte at a memory location
+; * PrintRegisters		.			.			Print the contents of the registers
+; * PushRegisters		.			.			Push the contents of the registers to RAM
+; * PullRegisters		.			.			Pull the contents of the registers from RAM
 ; * Run					X			.			Execute code at specified or CurrAddr
+; * SetAddress			X			.			Sets the current address for commands
+; * SetBank				X			.			Sets the current bank
+; * SkipSpaces			X			X			Skip spaces in the command line
 ; ****************************************************************************************
 
 ;   ____                   _   _____                                    
@@ -192,6 +201,49 @@ CmdPrompt:
 	clr		CmdErrorPtr			; Reset command error pointer
 	puls	D,PC
 
+
+;  ____    _                                         _     _              
+; |  _ \  (_)   __ _    __ _   _ __     ___    ___  | |_  (_)   ___   ___ 
+; | | | | | |  / _` |  / _` | | '_ \   / _ \  / __| | __| | |  / __| / __|
+; | |_| | | | | (_| | | (_| | | | | | | (_) | \__ \ | |_  | | | (__  \__ \
+; |____/  |_|  \__,_|  \__, | |_| |_|  \___/  |___/  \__| |_|  \___| |___/
+;                      |___/                                              
+;
+; Diagnose RAM and some peripherals
+; =================================
+
+Diagnostics:
+DiagBase:
+	ldx		#0					; Start address pointer
+	ldy		#RomStart			; End address pointer
+	clrf						; Clear error flag
+	lde		,X					; Read a byte and store it in E
+	; Test pattern $00
+	ldb		#$00
+	jsr		DiagCellPattern
+	; Test pattern $55
+	ldb		#$55
+	jsr		DiagCellPattern
+	; Test pattern $AA
+	ldb		#$AA
+	jsr		DiagCellPattern
+	; Test pattern $FF
+	ldb		#$FF
+	jsr		DiagCellPattern
+
+DiagEnd:
+	rts
+
+DiagCellPattern:
+	stb		,X					; Store test pattern in memory
+	lda		,X					; Read back memory
+	cmpr	A,B					; Does the memory cell match the pattern after read back
+	beq		DiagCellEnd			; If it's the same, test with pattern AA
+	ldf		#$FF				; Non-zero to indicate error in a cell
+	; *** Print cell error
+DiagCellEnd:
+	rts
+	
 ;  ____                              
 ; |  _ \   _   _   _ __ ___    _ __  
 ; | | | | | | | | | '_ ` _ \  | '_ \ 
