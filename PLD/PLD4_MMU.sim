@@ -1,0 +1,106 @@
+%SIGNAL
+PIN   5 =  A0 
+PIN   6 =  A1 
+PIN   7 =  A2 
+PIN   8 =  A3 
+PIN   9 =  A4 
+PIN  10 =  A5 
+PIN  11 =  A6 
+PIN  13 =  A7 
+PIN  23 =  BUF_OE 
+PIN  14 =  CLK_E 
+PIN   3 = !CONST 
+PIN  18 = !INIT0_R 
+PIN  17 = !INIT0_W 
+PIN  16 = !INIT1_R 
+PIN  15 = !INIT1_W 
+PIN   4 = !IORQ 
+PIN   1 =  MMU_EN 
+PIN  19 =  MMU_O 
+PIN  20 =  RAM_EN 
+PIN  21 =  RAM_OE 
+PIN  22 =  RAM_W 
+PIN   2 =  RW 
+%END
+
+%FIELD
+FIELD ADDRESS = A7,A6,A5,A4,A3,A2,A1,A0
+%END
+
+%EQUATION
+BUF_OE =>
+    !A4 & A5 & !A6 & A7 & CLK_E & !IORQ
+  # CLK_E & !CONST
+
+INIT0_R =>
+    !A0 & !A1 & !A2 & !A3 & A4 & !A5 & !A6 & A7 & CLK_E & !IORQ & RW
+
+INIT0_W =>
+    !A0 & !A1 & !A2 & !A3 & A4 & !A5 & !A6 & A7 & CLK_E & !IORQ & !RW
+
+INIT1_R =>
+    A0 & !A1 & !A2 & !A3 & A4 & !A5 & !A6 & A7 & CLK_E & !IORQ & RW
+
+INIT1_W =>
+    A0 & !A1 & !A2 & !A3 & A4 & !A5 & !A6 & A7 & CLK_E & !IORQ & !RW
+
+MMU_O =>
+    CLK_E & !CONST & MMU_EN
+
+RAM_EN =>
+    !A4 & A5 & !A6 & A7 & CLK_E & CONST & !IORQ
+  # CLK_E & !CONST & IORQ
+  # !A7 & CLK_E & !CONST
+  # A6 & CLK_E & !CONST
+  # !A5 & CLK_E & !CONST
+  # A4 & CLK_E & !CONST
+  # !A4 & A5 & !A6 & A7 & CLK_E & !IORQ & !MMU_EN
+
+RAM_OE =>
+    !A4 & A5 & !A6 & A7 & CLK_E & CONST & !IORQ
+  # CLK_E & !CONST & IORQ
+  # !A7 & CLK_E & !CONST
+  # A6 & CLK_E & !CONST
+  # !A5 & CLK_E & !CONST
+  # A4 & CLK_E & !CONST
+  # !MMU_EN & !RW
+  # !A4 & A5 & !A6 & A7 & CLK_E & !IORQ & !MMU_EN
+  # CONST & !RW
+  # !CLK_E & !RW
+
+RAM_W =>
+    !A4 & A5 & !A6 & A7 & CLK_E & !IORQ
+  # CLK_E & !CONST
+  # RW
+
+BUF_OE.oe  =>
+    1 
+
+CLK_E.oe  =>
+    0 
+
+INIT0_R.oe  =>
+    1 
+
+INIT0_W.oe  =>
+    1 
+
+INIT1_R.oe  =>
+    1 
+
+INIT1_W.oe  =>
+    1 
+
+MMU_O.oe  =>
+    1 
+
+RAM_EN.oe  =>
+    1 
+
+RAM_OE.oe  =>
+    1 
+
+RAM_W.oe  =>
+    1 
+
+%END

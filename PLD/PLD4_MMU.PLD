@@ -1,0 +1,66 @@
+Name      PLD4_MMU ;
+PartNo    ATF22V10C ;
+Date      2/17/2024 ;
+Revision  1.0 ;
+Designer  Frederic Segard ;
+Company   MicroHobbyist ;
+Assembly  None ;
+Location  U24 ;
+Device    g22v10 ;
+
+
+/***************** INPUT PINS **********************************/
+PIN 1   = MMU_EN   ; /* Quadrature E Clock                     */
+PIN 2   = RW       ; /* Quadrature Q Clock                     */
+PIN 3   = !CONST   ; /* Read / Write Control Line              */
+PIN 4   = !IORQ    ; /* I/O select line                        */
+PIN 5   = A0       ; /* Address bus                            */
+PIN 6   = A1       ; /* Address bus                            */
+PIN 7   = A2       ; /* Address bus                            */
+PIN 8   = A3       ; /* Address bus                            */
+PIN 9   = A4       ; /* Address bus                            */
+PIN 10  = A5       ; /* Address bus                            */
+PIN 11  = A6       ; /* Address bus                            */
+PIN 13  = A7       ; /* Address bus                            */
+PIN 14  = CLK_E    ; /* Clock E                                */
+
+/***************** OUTPUT PINS *********************************/
+PIN 23  = BUF_OE   ; /* 74HCT245 buffer output enable pin      */
+PIN 22  = RAM_W    ; /* RAM write pin                          */
+PIN 21  = RAM_OE   ; /* RAM output enable pin                  */
+PIN 20  = RAM_EN   ; /* RAM chip select pin                    */
+PIN 19  = MMU_O    ; /* MMU output pin                         */
+PIN 18  = !INIT0_R ; /* Register bit-6, MMU Enable (Read)      */
+PIN 17  = !INIT0_W ; /* Register bit-6, MMU Enable (Write)     */
+PIN 16  = !INIT1_R ; /* Register bit-0, MMU Task Select (Read) */
+PIN 15  = !INIT1_W ; /* Register bit-0, MMU Task Select (Write)*/
+
+/***************** EQUATIONS ***********************************/
+FIELD ADDRESS = [A7..A0] ;
+
+/* Two latch (273) and buffer (373) pairs to simulate GIME registers */
+INIT0_R = ADDRESS:[90] & IORQ &  RW & CLK_E ;         /* $FF90 */
+INIT0_W = ADDRESS:[90] & IORQ & !RW & CLK_E ;         /* $FF90 */
+INIT1_R = ADDRESS:[91] & IORQ &  RW & CLK_E ;         /* $FF91 */
+INIT1_W = ADDRESS:[91] & IORQ & !RW & CLK_E ;         /* $FF91 */
+
+/* Only when RAM is accessed from 6309 */
+BUF_OE  = (ADDRESS:[A0..AF] & IORQ & CLK_E) # (CONST & CLK_E) ;
+
+/* Only when RAM is written to */
+RAM_W   = (ADDRESS:[A0..AF] & IORQ & CLK_E) # (CONST & CLK_E) # RW ;
+
+/* Only when RAM is read */
+RAM_OE  = (!(CONST & CLK_E) & (ADDRESS:[A0..AF] & IORQ & CLK_E)) # 
+          ((CONST & CLK_E) & !(ADDRESS:[A0..AF] & IORQ & CLK_E)) #
+          (!MMU_EN & !RW) #
+          (!MMU_EN & (ADDRESS:[A0..AF] & IORQ & CLK_E)) #
+		  (!(CONST & CLK_E) & !RW) ;
+
+/* Anytime RAM is accessed */
+RAM_EN  = (!(CONST & CLK_E) & (ADDRESS:[A0..AF] & IORQ & CLK_E)) #
+          ((CONST & CLK_E) & !(ADDRESS:[A0..AF] & IORQ & CLK_E)) #
+          (!MMU_EN & (ADDRESS:[A0..AF] & IORQ & CLK_E)) ;
+
+/* Switches to constant RAM when CONST is active */
+MMU_O   = MMU_EN & (CONST & CLK_E) ;
