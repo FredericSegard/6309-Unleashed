@@ -1,7 +1,7 @@
 Name      PLD1_MemoryMap ;
 PartNo    ATF22V10C ;
-Date      2023-01-08 ;
-Revision  1 ;
+Date      2023-03-02 ;
+Revision  v1.1 ;
 Designer  Frederic Segard ;
 Company   MicroHobbyist ;
 Assembly  None ;
@@ -9,43 +9,43 @@ Location  U9 ;
 Device    g22v10 ;
 
 
-/***************** INPUT PINS **********************************/
-PIN 1   = CLK_E    ; /* Quadrature E Clock                     */
-PIN 2   = CLK_Q    ; /* Quadrature Q Clock                     */
-PIN 3   = RW       ; /* Read / Write Control Line              */
-PIN 4   = A4       ; /* Address bus                            */
-PIN 5   = A5       ; /* Address bus                            */
-PIN 6   = A6       ; /* Address bus                            */
-PIN 7   = A7       ; /* Address bus                            */
-PIN 8   = A8       ; /* Address bus                            */
-PIN 9   = A9       ; /* Address bus                            */
-PIN 10  = A10      ; /* Address bus                            */
-PIN 11  = A11      ; /* Address bus                            */
-PIN 13  = A12      ; /* Address bus                            */
-PIN 14  = A13      ; /* Address bus                            */
-PIN 15  = A14      ; /* Address bus                            */
-PIN 16  = A15      ; /* Address bus                            */
+/***************** INPUT PINS **************************************/
+PIN 1   = CLK_E    ; /* Quadrature E Clock                         */
+PIN 2   = CLK_Q    ; /* Quadrature Q Clock (Not currently used)    */
+PIN 3   = RW       ; /* Read / Write Control Line                  */
+PIN 4   = A4       ; /* Address bus                                */
+PIN 5   = A5       ; /* Address bus                                */
+PIN 6   = A6       ; /* Address bus                                */
+PIN 7   = A7       ; /* Address bus                                */
+PIN 8   = A8       ; /* Address bus                                */
+PIN 9   = A9       ; /* Address bus                                */
+PIN 10  = A10      ; /* Address bus                                */
+PIN 11  = A11      ; /* Address bus                                */
+PIN 13  = A12      ; /* Address bus                                */
+PIN 14  = A13      ; /* Address bus                                */
+PIN 15  = A14      ; /* Address bus                                */
+PIN 16  = A15      ; /* Address bus                                */
 
 
-/***************** OUTPUT PINS *********************************/
-PIN 17  = VECTOR   ; /* Vector range                           */
-PIN 18  = ACTMEM   ; /* Active memory range                    */
-PIN 19  = !CONST   ; /* Const range                            */
-PIN 20  = !MREQ    ; /* Memory range                           */
-PIN 21  = !IORQ    ; /* I/O range                              */
-PIN 22  = !WR      ; /* Write signal from R/W & E              */
-PIN 23  = !RD      ; /* Read signal from R/W & E               */
+/***************** OUTPUT PINS *************************************/
+PIN 17  = VECTOR   ; /* Vector range                               */
+PIN 18  = ACTMEM   ; /* Active memory range                        */
+PIN 19  = !CONST   ; /* Const range                                */
+PIN 20  = !MREQ    ; /* Memory range                               */
+PIN 21  = !IORQ    ; /* I/O range                                  */
+PIN 22  = !WR      ; /* Write signal from R/W & E                  */
+PIN 23  = !RD      ; /* Read signal from R/W & E                   */
 
 
-/***************** EQUATIONS ***********************************/
+/***************** EQUATIONS ***************************************/
 FIELD ADDRESS = [A15..A4] ;
 
-RD      =  RW & CLK_E ;
-WR      =  !RW & CLK_E ;
+RD      =  RW & CLK_E ;                     /* Extracted Read      */
+WR      =  !RW & CLK_E ;                    /* Extracted Write     */
 
-ACTMEM  =  ADDRESS:[0000..FEFF] ;
-IORQ    =  ADDRESS:[FF00..FFEF] ;
-VECTOR  =  ADDRESS:[FFF0..FFFF] ;
+ACTMEM  =  ADDRESS:[0000..FEFF] ;           /* Internal use only   */
+VECTOR  =  ADDRESS:[FFF0..FFFF] ;           /* Internal use only   */
 
-MREQ    =  ACTMEM # VECTOR ;
-CONST   =  ADDRESS:[FE00..FFFF] ;
+IORQ    =  ADDRESS:[FF00..FFEF] & CLK_E ;   /* I/O range           */
+MREQ    =  ACTMEM # VECTOR & CLK_E ;        /* Memory range        */
+CONST   =  ADDRESS:[FE00..FFFF] & CLK_E ;   /* Const range         */

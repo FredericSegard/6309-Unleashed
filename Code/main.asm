@@ -25,12 +25,13 @@
 ; *
 ; * Hardware:	CPU: HD63C09E, ROM: SST39010A (128KB Flash), RAM: AS6C4008-55 (512KB SRAM)
 ; *				COM1: R65C51 (ACIA->USB-B), Priority Interrupt Encoder
+; *             Memory Management Unit to manage 2MB of SRAM
 ; ****************************************************************************************
 
 ; Revision
 ; --------
-RevMajor	EQU	$00				; Major revision number: 0 = Breadboard, 1+ = PCB revision
-RevMinor	EQU	$0004			; Minor revision number
+RevMajor	EQU	$00				; Major revision number
+RevMinor	EQU	$07				; Minor revision number
 
 ; Keystrokes and delimiters
 ; -------------------------
@@ -45,10 +46,14 @@ EOD			EQU $FF				; End of data, used by some routines
 
 ; Misc
 ; ----
-RomStart	EQU	$E000			; Start of ROM
+RomStart	EQU	$C000			; Start of ROM
 ShadowBlk	EQU	$FF00-RomStart	; Shadow code block size to copy
-SysStack	EQU	$FC00			; Position system stack before Constant RAM space
-UsrStack	EQU	$FA00			; Position user stack before system stack
+SysSize		EQU	256				; Size of system stack
+UsrSize		EQU 256				; Size of user stack
+BlkTblSize	EQU	256				; Size of block table for bank RAM
+SysStack	EQU	BlockTable		; Position system stack before block table
+UsrStack	EQU	SysStack-SysSize ; Position user stack before system stack
+StackEnd	EQU UsrStack-UsrSize ; End position of stacks
 ScrHorzRes	EQU	80				; Default horizontal screen size
 ScrVertRes	EQU	24				; Default vertical screen size
 PromptSize	EQU	2+1+4+1+1		; Bank + ':' + Current address + '>' + space
@@ -59,6 +64,10 @@ BytePerLine	EQU 16				; Dump bytes per line. If screen = 80 then 16, else 8
 ; -------------
 RomDisable	EQU $FF08			; ROM disable (poke any value)
 IntVector	EQU $FF09			; Priority Interrupt Controller (reads a vector value)
+INIT0		EQU $FF90			; Init 0 register (bit 6 = MMU Enable)
+INIT1		EQU	$FF91			; Init 1 register (bit 0 to 4 = 32 bit tasks) 
+TASK0		EQU	$FFA0
+TASK1		EQU	$FFA8
 
 ; ----------------------------------------------------------------------------------------
 
@@ -104,12 +113,13 @@ ShadowEnd:
 Init:
 	sta		RomDisable			; Poke any value to disable the ROM
 
-	; Clear the shadow copy code
+	; Clear the shadow copy code from lower RAM
 	ldx		#$0100				; Source address containing saved value
 	ldy		#$0000				; Destination address
 	ldw		#$0100				; Number of bytes to copy (Clear page RTS)
 	tfm		X,Y+				; Transfer data and increment pointers
 
+Warm:
 	; Configure the stacks
 	ldu		#UsrStack			; Set the user stack
 	stu		RegU				; Save user stack
@@ -118,6 +128,8 @@ Init:
 	
 	; Initialize peripherals
 	jsr		Com1Init			; Initialize ACIA1
+	jsr		MmuReset			; Initialize MMU
+	jsr		PsgInit				; Initialize PSG
 	
 	; Print boot message
 	jsr		Cls					; Clears the screen
@@ -134,19 +146,13 @@ Init:
 	jsr		BinToBcd			; Convert to BCD
 	jsr		OutBcd
 	jsr		OutStr
-	ldd		#JmpStart-VarEnd	; Free shadow RAM left
+	ldd		#StackEnd-VarEnd	; Free shadow RAM left
 	jsr		BinToBcd			; Convert to BCD
 	jsr		OutBcd
 	jsr		OutStr
 
-	; Clear the registers
-	clrd						; Clear the D register (A & B)
-	clrw						; Clear the W register (E & F)
-	ldx		#$0000				; Clear X register
-	ldy		#$0000				; Clear Y register
-
 	; Clears some variables
-	std		CurrAddress
+	clr		CurrAddress
 	clr		CurrBank
 	clr		RunFlag				; 0 = Run not executed, Non-Zero = Run executed
 	
@@ -183,7 +189,8 @@ MainRunExec:
 	INCLUDE	"convert.asm"		; Conversion subroutines
 	INCLUDE	"io.asm"			; Input and Output subroutines
 	INCLUDE	"monitor.asm"		; Monitor commands subroutines
-	INCLUDE	"data.asm"			; Keep data include file at the end of the list
+	INCLUDE "psg.asm"			; Programmable Sound Generator subroutines
+	INCLUDE	"data.asm"			; Text data
 
 ;  ___           _                                          _         
 ; |_ _|  _ __   | |_    ___   _ __   _ __   _   _   _ __   | |_   ___ 
@@ -238,34 +245,59 @@ NMIInt:
 ; System variables used by monitor subroutines
 ; ============================================
 
-InStrBuffer:	.DS		$100	; String input for console input
-CmdErrorPtr:	.DS		1		; Command prompt error pointer
-CurrAddress:	.DS		2		; Current address, useful for monitor actions
-CurrBank:		.DS		1		; Current bank number, relative to current address
-RunFlag			.DS		1		; Run flag to indicate registers should be saved or not
-RegCC:			.DS		1		; Register CC
-RegDP:			.DS		1		; Register DP
-RegA:			.DS		1		; Register A
-RegB:			.DS		1		; Register B
-RegE:			.DS		1		; Register E
-RegF:			.DS		1		; Register F
-RegX:			.DS		2		; Register X
-RegY:			.DS		2		; Register Y
-RegU:			.DS		2		; User stack
-RegS:			.DS		2		; System stack
-RegPC:			.DS		2		; Register PC
-TempByte:		.DS		1		; Temporary storage byte (8-bit)
+VarStart:
+InStrBuffer:	.ds		$100	; String input for console input
+CmdErrorPtr:	.ds		1		; Command prompt error pointer
+CurrAddress:	.ds		2		; Current address, useful for monitor actions
+CurrBank:		.ds		1		; Current bank number, relative to current address
+RunFlag			.ds		1		; Run flag to indicate registers should be saved or not
+RegCC:			.ds		1		; Register CC
+RegDP:			.ds		1		; Register DP
+RegA:			.ds		1		; Register A
+RegB:			.ds		1		; Register B
+RegE:			.ds		1		; Register E
+RegF:			.ds		1		; Register F
+RegX:			.ds		2		; Register X
+RegY:			.ds		2		; Register Y
+RegU:			.ds		2		; User stack
+RegS:			.ds		2		; System stack
+RegPC:			.ds		2		; Register PC
+TempByte:		.ds		1		; Temporary storage byte (8-bit)
 TempWord:						; Temporary storage word (16-bit deconstructed)
-TempW1:			.DS		1		; Word MSB
-TempW2:			.DS		1		; Word LSB
+TempW1:			.ds		1		; Word MSB
+TempW2:			.ds		1		; Word LSB
 TempQuad:						; Temporary storage quad (32-bit deconstructed)
-TempQ1:			.DS		1		; Quad High MSB
-TempQ2:			.DS		1		; Quad Low MSB
-TempQ3:			.DS		1		; Quad High LSB
-TempQ4:			.DS		1		; Quad Low LSB
+TempQ1:			.ds		1		; Quad High MSB
+TempQ2:			.ds		1		; Quad Low MSB
+TempQ3:			.ds		1		; Quad High LSB
+TempQ4:			.ds		1		; Quad Low LSB
+RxBuffer		.ds		$100	; ACIA #1 receive buffer
+SndTable		.ds		2
+SndTempo		.ds		1
+SndVoice		.ds		1
+SndNoteCoarse	.ds		2
+SndNoteFine		.ds		2
+SndVolume		.ds		1
+SndDuration		.ds		1
 VarEnd:
 
-	FILL 'S',JmpStart-VarEnd	; Clear area with $00
+	FILL 'A',StackEnd-VarEnd	; Clear area with A's to indicate available shadow RAM
+	FILL 'U',UsrSize			; Clear area with U's to indicate user stack area
+	FILL 'S',SysSize			; Clear area with S's to insicate system stack area
+
+;  ____    _                  _    
+; | __ )  | |   ___     ___  | | __
+; |  _ \  | |  / _ \   / __| | |/ /
+; | |_) | | | | (_) | | (__  |   < 
+; |____/  |_|  \___/   \___| |_|\_\
+;
+; Block assignment table
+; ======================
+
+	ORG $FC00
+
+BlockTable:
+	FILL $00,BlkTblSize			; Clear area with 0's to indicate bank RAM block usage
 
 ;      _                             
 ;     | |  _   _   _ __ ___    _ __  
@@ -280,31 +312,31 @@ VarEnd:
 	ORG $FD00
 
 JmpStart:
-JmpCls:				.DW		Cls
-JmpDelChar:			.DW		DelChar
-JmpGetStrByte:		.DW		GetStrByte
-JmpGetStrNibble:	.DW		GetStrNibble
-JmpGetStrWord:		.DW		GetStrWord
-JmpInByte:			.DW		InByte
-JmpInChar:			.DW		InChar
-JmpInCharNW:		.DW		InCharNW
-JmpInStr:			.DW		InStr
-JmpInWord:			.DW		InWord
-JmpOutChar:			.DW		OutChar
-JmpOutByte:			.DW		OutByte
-JmpOutCRLF:			.DW		OutCRLF
-JmpOutNibble:		.DW		OutNibble
-JmpOutStr:			.DW		OutStr
-JmpOutWord:			.DW		OutWord
-JmpAscToBinNibble:	.DW		AscToBinNibble
-JmpAscToBinByte:	.DW		AscToBinByte
-JmpAscToBinWord:	.DW		AscToBinWord
-JmpBinToAscNibble:	.DW		BinToAscNibble
-JmpBinToAscByte:	.DW		BinToAscByte
-JmpBinToAscWord:	.DW		BinToAscWord
-JmpBinToBcd:		.DW		BinToBcd
-JmpUpperCase:		.DW		UpperCase
-JmpOutBcd:			.DW		OutBcd
+JmpCls:				.dw			Cls
+JmpDelChar:			.dw			DelChar
+JmpGetStrByte:		.dw			GetStrByte
+JmpGetStrNibble:	.dw			GetStrNibble
+JmpGetStrWord:		.dw			GetStrWord
+JmpInByte:			.dw			InByte
+JmpInChar:			.dw			InChar
+JmpInCharNW:		.dw			InCharNW
+JmpInStr:			.dw			InStr
+JmpInWord:			.dw			InWord
+JmpOutChar:			.dw			OutChar
+JmpOutByte:			.dw			OutByte
+JmpOutCRLF:			.dw			OutCRLF
+JmpOutNibble:		.dw			OutNibble
+JmpOutStr:			.dw			OutStr
+JmpOutWord:			.dw			OutWord
+JmpAscToBinNibble:	.dw			AscToBinNibble
+JmpAscToBinByte:	.dw			AscToBinByte
+JmpAscToBinWord:	.dw			AscToBinWord
+JmpBinToAscNibble:	.dw			BinToAscNibble
+JmpBinToAscByte:	.dw			BinToAscByte
+JmpBinToAscWord:	.dw			BinToAscWord
+JmpBinToBcd:		.dw			BinToBcd
+JmpUpperCase:		.dw			UpperCase
+JmpOutBcd:			.dw			OutBcd
 JmpTableEnd:
 
 	FILL 'J',ConstRAM-JmpTableEnd ; Clear area with $00
@@ -332,13 +364,13 @@ InputOutputRange:
 	ORG $FFF0					; Reset and Interrupt vectors ($FFF0-$FFFF)
 
 Vectors:
-	.DW		IllegalDiv0			; Illegal Opcode and Division by Zero Trap (6309 only)
-	.DW		SoftInt3			; SWI3
-	.DW		SoftInt2			; SWI2
-	.DW		SoftInt1			; SWI
-	.DW		FIRQInt				; FIRQ
-	.DW		IRQInt				; IRQ
-	.DW		NMIInt				; NMI
-	.DW		Reset				; RESET
+	.dw			IllegalDiv0			; Illegal Opcode and Division by Zero Trap (6309 only)
+	.dw			SoftInt3			; SWI3
+	.dw			SoftInt2			; SWI2
+	.dw			SoftInt1			; SWI
+	.dw			FIRQInt				; FIRQ
+	.dw			IRQInt				; IRQ
+	.dw			NMIInt				; NMI
+	.dw			Reset				; RESET
 
 	END

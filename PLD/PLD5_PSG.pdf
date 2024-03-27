@@ -1,0 +1,194 @@
+{COMPONENT S:\GITHUB\6309 UNLEASHED\PLD\PLD5_PSG.SYM
+
+ {ENVIRONMENT
+  {PDIFvrev 3.00}
+  {Program "CUPL(WM) Version 5.0a"}
+  {DBtype "Schematic"}
+  {DBvrev 1.01}
+  {DBtime "Sun Mar 24 14:38:46 2024 "}
+  {DBunit "MIL"}
+  {DBgrid 10}
+  {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
+          "PINNAM" 6 "PINCON" 4 "REFDES" 2 "ATTR" 6 "SDOT" 1 
+          "DEVICE" 5 "OUTLIN" 5 "ATTR2" 6 "NOTES" 6 "NETNAM" 4 
+          "CMPNAM" 5 "BORDER" 5}
+ }
+
+ {USER
+  {VIEW
+   {Mode SYMB}
+   {Nlst OPEN}
+   {Vw 0 0 2}
+   {Lv 12 2 2 2 0 0 2 2 2 2 0 0 2 1 2 0 0 0 0}
+   {Gs 10 10}
+  }
+ }
+
+ {DISPLAY
+  [Ly "PINNUM"]
+  [Ls "SOLID"][Wd 0]
+  [Ts 15][Tj "LC"][Tr 0][Tm "N"]
+ }
+
+ {SYMBOL
+  {PIN_DEF
+   [Ly "PINCON"]
+   {P A0 {Pt "INPUT"}{Lq 0}{Ploc 100 320}}
+   {P A1 {Pt "INPUT"}{Lq 0}{Ploc 100 300}}
+   {P A2 {Pt "INPUT"}{Lq 0}{Ploc 100 280}}
+   {P A3 {Pt "INPUT"}{Lq 0}{Ploc 100 260}}
+   {P A4 {Pt "INPUT"}{Lq 0}{Ploc 100 240}}
+   {P A5 {Pt "INPUT"}{Lq 0}{Ploc 100 220}}
+   {P A6 {Pt "INPUT"}{Lq 0}{Ploc 100 200}}
+   {P A7 {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
+   {P IOREQ' {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
+   {P RW {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
+   {P BDIR4 {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
+   {P BC4 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
+   {P BDIR3 {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
+   {P BC2 {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
+   {P BDIR1 {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
+   {P BC1 {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
+   {P BC3 {Pt "I/O"}{Lq 0}{Ploc 300 20}}
+   {P BDIR2 {Pt "I/O"}{Lq 0}{Ploc 300 40}}
+  }
+
+  {PKG
+   [Ly "REFDES"]
+   [Ts 25][Tj "CB"][Tr 0][Tm "N"]
+   {Rdl 200 350}
+
+   [Ly "PINNUM"]
+   [Ts 15][Tj "RC"]
+   {Pnl 120 330}
+   {Pnl 120 310}
+   {Pnl 120 290}
+   {Pnl 120 270}
+   {Pnl 120 250}
+   {Pnl 120 230}
+   {Pnl 120 210}
+   {Pnl 120 190}
+   {Pnl 120 170}
+   {Pnl 120 150}
+   {Pnl 120 130}
+   {Pnl 120 110}
+   {Pnl 120 90}
+   {Pnl 120 70}
+   {Pnl 120 50}
+   {Pnl 120 30}
+   [Ts 15][Tj "LC"]
+   {Pnl 280 30}
+   {Pnl 280 50}
+
+   {Sd A 1 2 3 4 5 6 7 8 9 11 12 13 14 17 18 19 15 16}
+  }
+
+  {PIC
+   [Ly "GATE"]
+   [Ts 15][Tj "LC"][Tr 0][Tm "N"]
+   {R 130 340 270 0}
+   {L 130 320 100 320}
+   {L 130 300 100 300}
+   {L 130 280 100 280}
+   {L 130 260 100 260}
+   {L 130 240 100 240}
+   {L 130 220 100 220}
+   {L 130 200 100 200}
+   {L 130 180 100 180}
+   {L 120 160 100 160}
+   {C 125 160 5}
+   {L 130 140 100 140}
+   {L 130 120 100 120}
+   {L 130 100 100 100}
+   {L 130 80 100 80}
+   {L 130 60 100 60}
+   {L 130 40 100 40}
+   {L 130 20 100 20}
+   {L 270 20 300 20}
+   {L 270 40 300 40}
+   [Ly "PINNAM"]
+   [Tj "LC"]
+   {T "A0" 140 320}
+   {T "A1" 140 300}
+   {T "A2" 140 280}
+   {T "A3" 140 260}
+   {T "A4" 140 240}
+   {T "A5" 140 220}
+   {T "A6" 140 200}
+   {T "A7" 140 180}
+   {T "IOREQ'" 140 160}
+   {T "RW" 140 140}
+   {T "BDIR4" 140 120}
+   {T "BC4" 140 100}
+   {T "BDIR3" 140 80}
+   {T "BC2" 140 60}
+   {T "BDIR1" 140 40}
+   {T "BC1" 140 20}
+   [Tj "RC"]
+   {T "BC3" 260 20}
+   {T "BDIR2" 260 40}
+   [Ly "DEVICE"]
+   [Tj "CT"]
+   {T "G16V8S" 200 -10}
+  }
+
+  {ATR
+   {IN
+    {Org 100 20}
+    {Ty 255}
+   }
+   {EX
+    [Ly "ATTR2"]
+    [Ts 12][Tj "CT"][Tr 0][Tm "N"]
+    {At PLD S:\GITHUB\6309 UNLEASHED\PLD\PLD5_PSG 200 340}
+   }
+  }
+ }
+
+ {DETAIL
+  {ANNOTATE
+  }
+
+  {NET_DEF
+   {N A0
+   }
+   {N A1
+   }
+   {N A2
+   }
+   {N A3
+   }
+   {N A4
+   }
+   {N A5
+   }
+   {N A6
+   }
+   {N A7
+   }
+   {N IOREQ'
+   }
+   {N RW
+   }
+   {N BDIR4
+   }
+   {N BC4
+   }
+   {N BDIR3
+   }
+   {N BC2
+   }
+   {N BDIR1
+   }
+   {N BC1
+   }
+   {N BC3
+   }
+   {N BDIR2
+   }
+  }
+
+  {SUBCOMP
+  }
+ }
+}

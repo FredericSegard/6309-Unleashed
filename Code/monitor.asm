@@ -15,6 +15,7 @@
 ; * Dump				X			.			Dumps the contents of memory
 ; * LoadIntelHex		.			.			Intel Hex loader
 ; * MemoryMap			.			.			Print memory and I/O map
+; * MemSize				.			.			Print the available memory of system
 ; * Peek				X			.			Read a byte from a memory location
 ; * Poke				X			.			Write a byte at a memory location
 ; * PrintRegisters		.			.			Print the contents of the registers
@@ -128,11 +129,11 @@ CmdHelp:
 ; Command parser for the monitor
 ; ==============================
 ; Input:	X = Command Prompt String
+; Clobbers:	D,Y
 
 	PRAGMA cc
 
 CmdParse:
-	pshs	A,B,Y,CC
 	jsr		SkipSpaces			; Skip leading spaces
 	stx		TempWord			; Store string pointer for command list cycling
 	lda		,X					; Load first character from command string to see if it's empty
@@ -168,12 +169,11 @@ CmdParseExecute:
 	ldd		,Y					; Load address of command from table
 	std		,--U				; Save address to user stack
 	leax	-1,X				; Backup pointer 1 position, because of the auto advance above
-	puls	A,B,Y,CC			; Restore registers
 	jmp		[,U++]				; Execute command
 CmdParseNone:
 	jsr		ErrInvalidCommand	;
 CmdParseEnd:
-	puls	A,B,Y,CC,PC
+	rts
 
 ;   ____                   _   ____                                       _   
 ;  / ___|  _ __ ___     __| | |  _ \   _ __    ___    _ __ ___    _ __   | |_ 
@@ -211,67 +211,137 @@ CmdPrompt:
 ;
 ; Diagnose RAM and some peripherals
 ; =================================
+; Regs:	A,B,E,F,X,Y
 
+	PRAGMA cc
+	
 Diagnostics:
-	ldx		#DiagMessage
-	jsr		OutStr
-DiagBase:
-	ldx		#DiagTestingMsg
-	jsr		OutStr
-	ldx		#$0000				; Start address pointer
-	ldy		#RomStart			; End address pointer
-	clrf						; Clear error flag
-DiagBaseLoop:
-	jsr		DiagTest			; Test RAM cell with different patterns
-	leax	1,X					; Increment address pointer
-	cmpr	X,Y
-	bne		DiagBaseLoop
-	tstw
-	beq		DiagBaseOK
-	ldx		#DiagFailMsg
-	jsr		OutStr				; Print fail message
-	tfr		W,D					; Copy the error count over to D
-	jsr		BinToBcd			; Convert the number of errors in D to decimal
-	jsr		OutBcd				; Print the number
-	jsr		OutStr				; Continue the fail message
-	bra		DiagBaseEnd
-DiagBaseOK:
-	ldx		#DiagPassMsg
-	jsr		OutStr
-DiagBaseEnd:
+	ldx		#DiagMessage		; Diagnostics message pointer
+	jsr		OutStr				; Print message
+	lda		$FFA0				; Load current block value from bank 0
+	pshs	A					; Save value
+	lda		$FF90				; Load INIT0 (MMU enable state)
+	pshs	A					; Save value
+	lda		$FF91				; Load INIT1 (Task number)
+	pshs	A					; Save value
+	jsr		MmuOn				; Enable MMU
+	jsr		MmuTaskSet0			; Switch to Task 0
+	ldy		#$1FFF				; Block size (8K)
+	; Test first 512KB chip
+	lda		#$00				; Block start
+	pshu	A
+	lde		#$40				; Block End
+	lda		#'1'				; Chip number
+	jsr		Diag512
+	; Test second 512KB chip
+	lda		#$40				; Block start
+	pshu	A
+	lde		#$80				; Block End
+	lda		#'2'				; Chip number
+	jsr		Diag512
+	; Test third 512KB chip
+	lda		#$80				; Block start
+	pshu	A
+	lde		#$C0				; Block End
+	lda		#'3'				; Chip number
+	jsr		Diag512
+	; Test fourth 512KB chip
+	lda		#$C0				; Block start
+	pshu	A
+	lde		#$00				; Block End
+	lda		#'4'				; Chip number
+	jsr		Diag512
+DiagEnd:
+	puls	A
+	sta		$FF91				; Restore task number to inital value
+	puls	A
+	sta		$FF90				; Restore MMU state to initial value
+	puls	A
+	sta		$FFA0				; Restore bank0 block number to inital value
 	rts
 
 ; Diagnostic subroutines
 ; ----------------------
 
+; Test a complete 512KB chip
+Diag512:
+	clrf						; Clear error flag
+	ldx		#DiagTestingMsg		; Testing chip message pointer
+	jsr		OutStr				; Print message
+	jsr		OutChar
+	lda		#':'
+	jsr		OutChar
+	lda		#' '
+	jsr		OutChar
+	pulu	A					; Load start block number
+Diag512Loop:
+	sta		$FFA0				; Store it to bank 0 of task 0
+	jsr		MemSizeValidate		; Check if there is valid memory at that location
+	bcc		DiagSkip			; Skip test if no memory is present
+	jsr		OutByte				; Display block number
+	jsr		DiagBlock			; Test the block
+	inca						; Next block
+	cmpa	#$07				; Skip ROM area
+	bne		Diag512Continue		; It not ROM, then continue
+	inca						; Proceed to next block
+Diag512Continue:
+	ldb		#2					; Number of bytes to erase on screen
+	jsr		DelChar				; Delete block number
+	cmpr	A,E					; Has all the blocks been tested?
+	bne		Diag512Loop			; Loop until finished
+DiagPassFail:
+	tstf						; Check error flag
+	beq		DiagPass			; If no errors found then print "Pass"
+DiagFail:
+	ldx		#DiagFailMsg		; Fail message pointer
+	jsr		OutStr				; Print fail message
+	rts
+DiagPass:
+	ldx		#DiagPassMsg		; Pass message pointer
+	jsr		OutStr				; Print Pass message
+	rts
+DiagSkip:
+	ldx		#DiagSkipMsg		; Pass message pointer
+	jsr		OutStr				; Print Pass message
+	rts
+
+
+; Test bank 0
+DiagBlock:
+	ldx		#$0000				; Start address pointer
+DiagBlockLoop:
+	jsr		DiagTest			; Test RAM cell with different patterns
+	leax	1,X					; Increment address pointer
+	cmpr	X,Y					; Has the end of the block been reached?
+	bne		DiagBlockLoop		; No, then loop
+	rts
+
+; Test a cell with 2 distinct patterns
 DiagTest:
 	; Read a byte and save it for later
+	pshs	A
 	lda		,X
 	pshs	A
-	; Test pattern $00
-	ldb		#$00
-	jsr		DiagCellPattern
 	; Test pattern $55
 	ldb		#$55
 	jsr		DiagCellPattern
 	; Test pattern $AA
 	ldb		#$AA
 	jsr		DiagCellPattern
-	; Test pattern $FF
-	ldb		#$FF
-	jsr		DiagCellPattern
 	; Restore original data in cell
 	puls	A
 	sta		,X
-	rts
+	puls	A,PC
+
+; Test and compare a cell, and flag error if any
 DiagCellPattern:
 	; B = Test pattern
 	; X = Current cell pointer
 	stb		,X					; Store test pattern in memory
 	lda		,X					; Read back memory
 	cmpr	A,B					; Does the memory cell match the pattern after read back
-	beq		DiagCellEnd			; If it's the same, test with pattern AA
-	incw						; Increment error count
+	beq		DiagCellEnd			; If it's the same, test with next pattern
+	ldf		#$01				; Makes sure F is non-zero
 	; *** Print cell error
 DiagCellEnd:
 	rts
@@ -286,6 +356,8 @@ DiagCellEnd:
 ; Memory dump
 ; ===========
 
+	PRAGMA cc
+	
 Dump:
 	jsr		SkipSpaces			; Remove leading white spaces
 	lda		,X					; Read a character from string
@@ -296,7 +368,7 @@ Dump:
 DumpDisplay:
 	ldx		CurrAddress			; Retrieve Current Address
 	tfr		X,Y
-	lde		#ScrVertRes-4		; Number of lines to print
+	lde		#16					; Number of lines to print
 DumpAddr:
 	tfr		X,D					; Put Current address in D
 	jsr		OutWord				;
@@ -339,6 +411,32 @@ DumpInvalidAddress:
 	jsr		ErrInvalidAddress	; Display address error
 DumpEnd:
 	rts
+
+;  ___           _     _____                _   
+; |_ _|  _ __   | |_  |_   _|   ___   ___  | |_ 
+;  | |  | '_ \  | __|   | |    / _ \ / __| | __|
+;  | |  | | | | | |_    | |   |  __/ \__ \ | |_ 
+; |___| |_| |_|  \__|   |_|    \___| |___/  \__|
+;
+; Testing Priority Interrupt Encoder
+; ==================================
+
+	PRAGMA cc
+
+IntTest:
+	ldb		#$2					; Number of bytes to erase
+IntTestLoop:
+	jsr		InCharNW			; Read characther (non-waiting)
+	cmpa	#ESC				; Is it the ESCape key?
+	beq		IntTestEnd			; Yes, then end the routine
+	lda		IntVector			; Read the interrupt vector
+	lsra						; Shift it right
+	jsr		OutByte				; Print value of interrupt
+	jsr		Delay				; Let it stay still for a while
+	jsr		DelChar				; Delete the byte on screen
+	bra		IntTestLoop			; Loop until ESC
+IntTestEnd:
+	rts
 	
 ;  _                           _   ___           _            _   _   _               
 ; | |       ___     __ _    __| | |_ _|  _ __   | |_    ___  | | | | | |   ___  __  __
@@ -355,9 +453,9 @@ DumpEnd:
 ;			Y = Byte count in current record
 ; Vars:		TempWord
 
+	PRAGMA cc
+	
 LoadIntelHex:
-	pshs	A,B,X,Y,CC
-	pshsw
 	clrw						; Clear the flags and checksum accumulator
 	ldx		#LoadStartMsg		; Print message that loading will commence
 	jsr		OutStr				; 
@@ -461,8 +559,7 @@ LoadSuccess:
 	ldx		#LoadSuccessMsg		; Print success message
 	jsr		OutStr
 LoadEnd:
-	pulsw
-	puls	A,B,X,Y,CC,PC
+	rts
 
 ;  __  __                                             __  __                 
 ; |  \/  |   ___   _ __ ___     ___    _ __   _   _  |  \/  |   __ _   _ __  
@@ -474,17 +571,348 @@ LoadEnd:
 ; Prints the memory and I/O map of the system
 ; ===========================================
 
+	PRAGMA cc
+	
 MemoryMap:
-	pshs	A,B
 	ldx		#MemoryMapMsg
 	jsr		OutStr				; Print up to end of RAM
 	ldd		#RomStart-1
-	jsr		OutWord				; Print RAM end
+	jsr		OutWord				; Print up to ROM start -1
 	jsr		OutStr				; Print up to begining of ROM
 	incd
 	jsr		OutWord				; Print ROM start
-	jsr		OutStr				; Print till the end of mapping
-	puls	A,B,PC
+	lda		#'-'
+	jsr		OutChar
+	lda		#'$'
+	jsr		OutChar
+	ldd		#VarStart
+	jsr		OutWord
+	jsr		OutStr				; Print till end:
+	rts
+
+;  __  __                      _____                 
+; |  \/  |   ___   _ __ ___   |_   _|   __ _    __ _ 
+; | |\/| |  / _ \ | '_ ` _ \    | |    / _` |  / _` |
+; | |  | | |  __/ | | | | | |   | |   | (_| | | (_| |
+; |_|  |_|  \___| |_| |_| |_|   |_|    \__,_|  \__, |
+;                                              |___/ 
+;
+; Tags memory by writing block number into 8K banks
+; =================================================
+; Regs:	A,B,W,X,Y
+; Note: Future version will detect RAM amount
+
+MemTag:
+	jsr		MmuOn
+	lda		#$3F				; Start at upper memory
+	ldb		#$02				; Number of characters to erase
+MemTagLoop:
+	sta		$FFA0				; Store block number in bank 0
+	jsr		OutByte				; Output current block
+	ldx		#$FFA0				; Source address containing value
+	ldy		#$0000				; Destination address
+	ldw		#$2000				; Number of bytes to copy
+	tfm		X,Y+				; Transfer data and increment destination pointer
+	jsr		DelChar				; Delete the previously writen byte
+	cmpa	#$00				; Has it reached 0?
+	beq		MemTagEnd			; Yes, then end
+	deca						; Decrement A
+	cmpa	#$07				; Is it block 07, where ROM data is?
+	bne		MemTagLoop			; No, then copy next block
+	deca						; Decrement A to skip block 07
+	bra		MemTagLoop			; Loop to copy next block
+MemTagEnd:
+	rts
+
+;  __  __                      ____    _              
+; |  \/  |   ___   _ __ ___   / ___|  (_)  ____   ___ 
+; | |\/| |  / _ \ | '_ ` _ \  \___ \  | | |_  /  / _ \
+; | |  | | |  __/ | | | | | |  ___) | | |  / /  |  __/
+; |_|  |_|  \___| |_| |_| |_| |____/  |_| /___|  \___|
+;
+; Memory Size
+; ===========
+; Regs:		D = Various data manipulation (Mostly A)
+;			W = Extended RAM accumulator
+
+	PRAGMA cc
+	
+MemSize:
+	; Enable MMU if not active, if not already active
+	lda		$FF90				; Read the current content of the INIT0 register
+	pshs	A					; Save the INIT0 register
+	ora		#%01000000			; Turn on bit-6: MMU enable
+	sta		$FF90				; Activate MMU if not already done
+	; Switch to task 0 if not already there
+	lda		$FF91				; Read the current content of the INIT1 register
+	pshs	A					; Save the INIT1 register
+	anda	#%11111110			; Turn off bit-0: Task 0/1
+	sta		$FF91				; Switch to task 0
+	; Save state of first MMU bank
+	lda		$FFA0				; Read block number of first bank
+	pshs	A					; Save the block number
+	; Assume first 512K chip is already installed, substracting the base 64K
+	ldw		#512-64				; 448KB extended by default
+	; Verify if the 2nd 512K chip installed
+	lda		#$40				; Block number $40 is the start of 2nd 512K chip
+	sta		$FFA0				; Save it in bank 0 of task 0
+	jsr		MemSizeValidate		; Test cell at $0000
+	bcc		MemSizeDisplay		; If no valid cell is detected, display tally
+	addw	#512				; Add 512KB to total
+	; Verify if the 3rd 512K chip installed
+	lda		#$80				; Block number $80 is the start of 3rd 512K chip
+	sta		$FFA0				; Save it in bank 0 of task 0
+	jsr		MemSizeValidate		; Test cell at $0000
+	bcc		MemSizeDisplay		; If no valid cell is detected, display tally
+	addw	#512				; Add 512KB to total
+	; Verify if the 4th 512K chip installed
+	lda		#$C0				; Block number $C0 is the start of 4th 512K chip
+	sta		$FFA0				; Save it in bank 0 of task 0
+	jsr		MemSizeValidate		; Test cell at $0000
+	bcc		MemSizeDisplay		; If no valid cell is detected, display tally
+	addw	#512				; Add 512KB to total
+MemSizeDisplay:
+	pshsw						; Save W to calculate total RAM
+	pshsw						; Save W, because it gets clobberd by BinToBcd
+	; Start printing mem stats
+	ldx		#MemorySizeMsg		; Point to Memory Size message
+	jsr		OutStr				; Output up till "bytes free"
+
+	ldd		#RomStart			; Total free RAM available **** (Update to read non empty RAM)
+
+	jsr		BinToBcd			; Convert to BCD
+	jsr		OutBcd				; Print free base RAM
+	jsr		OutStr				; Print till "Extended RAM:"
+	puls	D					; Restore what was W in stack to D
+	jsr		BinToBcd			; Convert total extended RAM to BCD => Q
+	jsr		OutBcd				; Output BCD number (in Q)
+	jsr		OutStr				; Output string till "blocks free"
+	
+	clra
+	ldb		#$40-8				; **** (Update to count number of blocks used)
+	jsr		BinToBcd			; Convert total extended RAM to BCD => Q
+	jsr		OutBcd				; Output BCD number (in Q)
+
+	jsr		OutStr				; Output string will "Total RAM"
+	puls	D					; Restore Extended RAM tally to D
+	addd	#64					; Add 64 to tally
+	jsr		BinToBcd			; Convert total RAM to BCD
+	jsr		OutBcd				; Output BCD number
+	jsr		OutStr				; Output string to the end
+MemSizeEnd:
+	; Restore the state of the first MMU bank
+	puls	A					; Get the saved bank block to accumulator
+	sta		$FFA0				; Restore the block number to it's previous state
+	; Restore the state of the task number
+	puls	A					; Get the saved active task to accumulator
+	sta		$FF91				; Restore active task to it's previous state
+	; Restore MMU state
+	puls	A					; Get the INIT1 status register to accumulator
+	sta		$FF90				; Restore the INIT1 register to it's previous state
+	rts
+
+; MemSize subroutine
+; ------------------
+
+MemSizeValidate:
+	pshs	D
+	lda		$0000				; Read first byte of bank 0
+	tfr		A,B					; Save existing data to B
+	lda		#$55				; Load a test pattern in A
+	sta		$0000				; Save test pattern in memory
+	lda		$0000				; Reload from memory
+	cmpa	#$55				; Compare values to see if they match
+	bne		MemSizeEmpty		; If not equal, exit with Carry clear
+	lda		#$AA				; Load a second test pattern in A, to test for a fluke
+	sta		$0000				; Save test pattern in memory
+	lda		$0000				; Reload from memory
+	cmpa	#$AA				; Compare values to see if they match
+	bne		MemSizeEmpty		; If not equal, exit with Carry clear
+	orcc	#$01				; Set carry flag to indicate there is an active memory cell
+	bra		MemSizeValEnd		; End subroutine
+MemSizeEmpty:
+	andcc	#$FE				; Clear Carry to indicate the memory cell is empty
+MemSizeValEnd:
+	stb		$0000				; Save back orginal data that was saved in B
+	puls	D,PC
+
+;  __  __   __  __   _   _ 
+; |  \/  | |  \/  | | | | |
+; | |\/| | | |\/| | | | | |
+; | |  | | | |  | | | |_| |
+; |_|  |_| |_|  |_|  \___/ 
+;
+; MMU commands
+; ============
+
+	PRAGMA cc
+
+Mmu:
+	jsr		SkipSpaces			; Skip leading spaces
+	stx		TempWord			; Store string pointer for parameter list cycling
+	lda		,X					; Load first character from parameter string to see if it's empty
+	beq		MmuStatus			; If no parameter has been entered, then print MMU status
+	inc		CmdErrorPtr			; Increment Error pointer 1 space to account for parameter delimiter
+	lde		CmdErrorPtr			; Load command error pointer to E for later use
+	ldy		#MmuList			; Load parameter list table location in Y
+MmuParseChar:
+	lda		,X+					; Load first character from parameter prompt string
+	jsr		UpperCase			; Convert character to upper case (parameter list is in upper case)
+	ldb		,Y+					; Load a character from the parameter list
+	bmi		MmuParseValid		; Parameter code end delimiter? Execute parameter
+	cmpr	A,B					; Compare parameter string to parameter list character
+	bne		MmuParseSkip		; Skip parameter list entry and point to next parameter
+	inc		CmdErrorPtr			; Increment command line error pointer
+	bra		MmuParseChar		; Go and compare the next character
+MmuParseSkip:
+	ldx		TempWord			; Restore parameter prompt pointer to starting position
+	ste		CmdErrorPtr			; Restore command prompt error pointer
+MmuParseSkipLoop:
+	ldb		,Y+					; Read next character
+	bpl		MmuParseSkipLoop	; Loop until parameter list end delimiter is found
+	leay	2,Y					; Jump over parameter address
+	ldb		,Y					; Is it the end of the parameter list
+	beq		MmuParseNone		; Yes it is, print error and exit
+	bra		MmuParseChar		; Repeat process until parameter found
+MmuParseValid:
+	; Check for characters after valid parameter
+	cmpa	#' '				; Check for a parameter separator (space)
+	beq		MmuParseExecute		; Yes, then execute parameter
+	cmpa	#$00				; Check for an end of line in string (null)
+	bne		MmuParseNone		; If it's something else, the parameter invalid, else execute
+MmuParseExecute:
+;	inc		CmdErrorPtr			; Shift pointer by 1 for arguments in command line
+	ldd		,Y					; Load address of parameter from table
+	std		,--U				; Save address to user stack
+	leax	-1,X				; Backup pointer 1 position, because of the auto advance above
+	jmp		[,U++]				; Execute parameter
+MmuParseNone:
+	jsr		ErrInvalidParameter	;
+	rts
+
+; MMU subroutines
+; ---------------
+
+; Prints the status of the MMU (Enabled or not, Task 0 or 1, and all bank registers)
+MmuStatus:
+	ldx		#MmuMsg
+	jsr		OutStr				; Print up to Enabled status
+	; Is the MMU enabled or disabled
+	lda		$FF90				; Load status of INIT0 register
+	anda	#%01000000			; Check the status of bit 6
+	bne		MmuEnabled			; If it's enabled, go print ON
+	lda		#'O'				; Else print OFF
+	jsr		OutChar
+	lda		#'F'
+	jsr		OutChar
+	lda		#'F'
+	jsr		OutChar
+	bra		MmuTaskNum			; Check task number
+MmuEnabled:
+	lda		#'O'
+	jsr		OutChar
+	lda		#'N'
+	jsr		OutChar
+MmuTaskNum:
+	; What is the task number?
+	jsr		OutStr				; Print up to Task 0/1
+	lda		$FF91				; Load the status of INIT1 register
+	anda	#%00000001			; Check the status of bit 1
+	bne		MmuTaskNum1			; If it's 1, go print 1
+	lda		#'0'				; Else print 0
+	jsr		OutChar
+	bra 	MmuTaskRegs
+MmuTaskNum1:
+	lda		#'1'
+	jsr		OutChar
+MmuTaskRegs:
+	; Print the status of the bank registers $FFA0 to $FFAF
+	jsr		OutStr				; Print up to Task 1
+	ldy		#TASK0				; Load base task 0 address ($FFA0)
+	ldb		#8					; 8 block counter
+MmuTask0Loop:
+	lda		,Y					; Load content pointed by Y and increment to next address
+	jsr		OutByte				; Print content
+	lda		#'-'				; Print separator
+	jsr		OutChar
+	leay	1,Y
+	decb						; Decrease pointer
+	bne		MmuTask0Loop		; Loop until all 8 blocks are printed
+	incb						; 0+1 is the number of characters to delete
+	jsr		DelChar				; Delete last dash
+	jsr		OutStr				; Print till Task 1:
+	ldy		#TASK1				; Load base task 1 address ($FFA8)
+	ldb		#8					; 8 block counter
+MmuTask1Loop:
+	lda		,Y					; Load the content pointed by Y and increment to next address
+	jsr		OutByte				; Print content
+	lda		#'-'				; Print separator
+	jsr		OutChar
+	leay	1,Y
+	decb						; Decrement pointer
+	bne		MmuTask1Loop		; Loop until all 8 blocks are printed
+	incb						; 0+1 is the number of characters to delete
+	jsr		DelChar				; Delete last dash
+	jsr		OutCRLF				; Change line
+MmuStatusEnd:
+	rts
+
+; Turns on the MMU
+MmuOn:
+	lda		$FF90				; Load INIT0
+	ora		#%01000000			; Activate bit 6
+	sta		$FF90				; Store INIT0 to activate MMU
+	rts
+
+; Turns off the MMU
+MmuOff:
+	lda		$FF90				; Load INIT0
+	anda	#%10111111			; Deactivate bit 6
+	sta		$FF90				; Store INIT0 to activate MMU
+	rts
+	
+; Select the Task number
+MmuTask:
+	jsr		SkipSpaces			; Remove leading spaces
+	lda		,X					; Load first character
+	beq		MmuTaskErr			; Is it the end of the string?
+	cmpa	#'0'				; Is it task 0?
+	beq		MmuTaskSet0			; Yes, then set to task 0
+	cmpa	#'1'				; Is it task 1?
+	beq		MmuTaskSet1			; Yes, then set to task 1
+	bra		MmuTaskErr
+MmuTaskSet0:
+	lda		$FF91				; Load INIT1
+	anda	#%11111110			; Deactivate bit 0
+	sta		$FF91				; Store INIT1 to switch to task 0
+	rts
+MmuTaskSet1:
+	lda		$FF91				; Load INIT1
+	ora		#%00000001			; Activate bit 0
+	sta		$FF91				; Store INIT1 to switch to task 1
+	rts
+MmuTaskErr:
+	jsr		ErrInvalidParameter	; Print invalid parameter message
+	rts
+	
+; Reset the MMU to it's defaults
+MmuReset:
+	jsr		MmuOff				; Disable MMU
+	jsr		MmuTaskSet0			; Switch to Task 0
+	; Reset Banks to default
+	ldx		#BlockTable			; Block table base address
+	ldy		#TASK0				; Bank registers base address
+	clra						; Set A to 0
+MmuResetLoop:
+	sta		,X+					; Store value in block table
+	sta		,Y+					; Store value in bank register
+	inca						; Increment A
+	cmpa	#$0F				; Are we at the last address?
+	bne		MmuResetLoop		; No, continue reseting the bank registers
+	lda		#$07				; Set the 8th bank of task 1 to match that of task 0
+	sta		,X					; Store it
+	sta		,Y					; Store it
+	rts
 
 ;  ____                  _    
 ; |  _ \    ___    ___  | | __
@@ -492,10 +920,11 @@ MemoryMap:
 ; |  __/  |  __/ |  __/ |   < 
 ; |_|      \___|  \___| |_|\_\
 ;
-;
 ; Read a byte from a specific or current address
 ; ==============================================
 
+	PRAGMA cc
+	
 Peek:
 	jsr		SkipSpaces
 	lda		,X
@@ -527,6 +956,8 @@ PeekEnd:
 ; Writes a byte at a specific address
 ; ===================================
 
+	PRAGMA cc
+	
 Poke:
 	jsr		SkipSpaces			; Remove excessive leading spaces
 	lda		,X					; Load character
@@ -566,6 +997,9 @@ PokeEnd:
 ;
 ; Print Registers
 ; ===============
+
+	PRAGMA cc
+	
 PrintRegisters:
 	; Print Register A
 	lda		#'A'
@@ -683,6 +1117,8 @@ PrintRegisters:
 ; ==============
 ; Input:	User Stack contains register content after a return from run
 
+	PRAGMA cc
+	
 PushRegisters:	
 	; Recover register values from last run command
 	puluw
@@ -712,7 +1148,10 @@ PushRegisters:
 ;                                         |___/                                     
 ;
 ; Pull Registers
-; --------------
+; ==============
+
+	PRAGMA cc
+	
 PullRegisters:	
 	lda		RegCC				; Load CC register
 	pshs	A					; Store it so it can be restored
@@ -735,6 +1174,8 @@ PullRegisters:
 ; -------------------------------------------------
 ; Input:	X = Command line string
 
+	PRAGMA cc
+	
 Run:
 	jsr		SkipSpaces			; Removes possible leading spaces
 	lda		,X					; Read character from command line
@@ -765,8 +1206,9 @@ RunEnd:
 ; ========================
 ; Input:	X = Command line string
 
+	PRAGMA cc
+	
 SetAddress:
-	pshs	A,B,CC
 	jsr		SkipSpaces			; Remove leading spaces
 	lda		,X					; Load first character
 	beq		SetAddressDefault	; Is it the end of the string?
@@ -781,34 +1223,7 @@ SetAddressDefault:
 	ldd		#$0000
 	std		CurrAddress			; Set default address to $0000
 SetAddressEnd:
-	puls	A,B,CC,PC
-
-;  ____           _     ____                    _    
-; / ___|    ___  | |_  | __ )    __ _   _ __   | | __
-; \___ \   / _ \ | __| |  _ \   / _` | | '_ \  | |/ /
-;  ___) | |  __/ | |_  | |_) | | (_| | | | | | |   < 
-; |____/   \___|  \__| |____/   \__,_| |_| |_| |_|\_\
-;
-; Sets the current bank
-; =====================
-; Input:	X = Command line string
-
-SetBank:
-	pshs	A,CC
-	jsr		SkipSpaces			; Remove leading spaces
-	lda		,X					; Load first character
-	beq		SetBankDefault		; Is it the end of the string?
-	jsr		GetStrByte			; Get bank from the input buffer
-	bcc		SetBankError		; Error in byte
-	sta		CurrBank			; Save the bank
-	bra		SetBankEnd
-SetBankError:
-	jsr		ErrInvalidByte		; Display byte error
-	bra		SetBankEnd
-SetBankDefault:
-	clr		CurrBank			; Set default bank to $00
-SetBankEnd:
-	puls	A,CC,PC
+	rts
 
 ;  ____    _      _           ____                                      
 ; / ___|  | | __ (_)  _ __   / ___|   _ __     __ _    ___    ___   ___ 
@@ -825,7 +1240,7 @@ SetBankEnd:
 	PRAGMA cc
 
 SkipSpaces:
-	pshs	A,CC
+	pshs	A
 SkipSpacesLoop:
 	lda		,X					; Load character from string
 	beq		SkipSpacesEnd		; Is it the end of the string? Yes, then exit
@@ -835,4 +1250,84 @@ SkipSpacesLoop:
 	inc		CmdErrorPtr			; Increment error pointer to next potential error location
 	bra		SkipSpacesLoop		; Go and read another character
 SkipSpacesEnd:
-	puls	A,CC,PC
+	puls	A,PC
+
+; __        __                             ____                    _   
+; \ \      / /   __ _   _ __   _ __ ___   | __ )    ___     ___   | |_ 
+;  \ \ /\ / /   / _` | | '__| | '_ ` _ \  |  _ \   / _ \   / _ \  | __|
+;   \ V  V /   | (_| | | |    | | | | | | | |_) | | (_) | | (_) | | |_ 
+;    \_/\_/     \__,_| |_|    |_| |_| |_| |____/   \___/   \___/   \__|
+;
+; Warm boot the computer
+; ======================
+
+Warmboot:
+	jmp		Warm				; Warm boots the computer
+	
+; __        __         _   _          
+; \ \      / /  _ __  (_) | |_    ___ 
+;  \ \ /\ / /  | '__| | | | __|  / _ \
+;   \ V  V /   | |    | | | |_  |  __/
+;    \_/\_/    |_|    |_|  \__|  \___|
+;
+; Write a sequence of bytes starting at a base address
+; ====================================================
+
+	PRAGMA cc
+
+Write:
+	; Get base address
+	jsr		SkipSpaces			; Skipe leading white spaces
+	lda		,X					; Load first character
+	beq		WriteNoParameter	; If it's the end of the string, then missing parameter
+	jsr		GetStrWord			; Get address from the input buffer
+	bcc		WriteAddressError	; Error in address
+	std		CurrAddress			; Save the address
+	tfr		D,Y					; Copy address to Y
+	; Get first byte
+	clre						; Set number of bytes to zero
+	jsr		SkipSpaces			; Skipe leading white spaces
+	lda		,X					; Load character
+	beq		WriteNoParameter	; If it's the end of the string, then missing parameter
+	jsr		GetStrByte			; Get address from the input buffer
+	bcc		WriteByteError		; Error in byte
+	sta		,Y+					; Store byte at address
+	ince						; Set byte count to 1
+	; Get remaining bytes if any
+WriteByteLoop:
+	jsr		SkipSpaces			; Skipe leading white spaces
+	lda		,X					; Load character
+	beq		WriteConfirm		; Read back and print bytes to confirm proper write
+	jsr		GetStrByte			; Get address from the input buffer
+	bcc		WriteByteError		; Error in byte
+	sta		,Y+					; Store byte at address
+	ince						; Increment byte counter
+	bra		WriteByteLoop
+WriteNoParameter:
+	jsr		ErrNoParameter		; Display no parameter error
+	rts
+WriteAddressError:
+	jsr		ErrInvalidAddress	; Display address error
+	rts
+WriteByteError:
+	jsr		ErrInvalidByte		; Display address error
+	rts
+WriteConfirm:	
+	ldd		CurrAddress			; Load base address
+	tfr		D,Y					; Copy address to Y
+	jsr		OutWord				; Print base address
+	lda		#':'				; Separate address and byte with colon
+	jsr		OutChar				; Print separator
+WriteConfirmLoop:
+	lda		,Y+					; Read byte
+	jsr		OutByte				; Print byte
+	dece						; Decrement byte counter
+	beq		WriteEnd			; Is it the end? Then exit
+	lda		#','				; Separate bytes with comma
+	jsr		OutChar				; Print comma
+	bra		WriteConfirmLoop	; Check for next byte
+WriteEnd:
+	sty		CurrAddress			; Save state of current address
+	jsr		OutCRLF				; Change line
+	rts
+	

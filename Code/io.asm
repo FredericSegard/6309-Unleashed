@@ -176,6 +176,29 @@ Com1TxNotReady:
 	sta		Com1_Data			; Send out the character
 	rts
 
+;  ____           _                 
+; |  _ \    ___  | |   __ _   _   _ 
+; | | | |  / _ \ | |  / _` | | | | |
+; | |_| | |  __/ | | | (_| | | |_| |
+; |____/   \___| |_|  \__,_|  \__, |
+;                             |___/ 
+;
+; Delay Loop
+; ==========
+
+	PRAGMA cc
+
+Delay:
+	pshsw
+	ldw		#$8000
+DelayLoop:
+	decw
+	beq		DelayEnd
+	bra		DelayLoop
+DelayEnd:
+	pulsw
+	rts
+
 ;  ____           _    ____   _                    
 ; |  _ \    ___  | |  / ___| | |__     __ _   _ __ 
 ; | | | |  / _ \ | | | |     | '_ \   / _` | | '__|
@@ -546,16 +569,17 @@ InWord:
 ; Input:	Q = Data to print (ABEF)
 
 OutBcd:
-	clrb						; B = 0 indicates to skip leading LSB 0
+	pshs	Y
+	ldy		#$0000				; X = 0 indicates to skip leading 0
 	jsr		OutBcdSub			; Process A
 	tfr		B,A
 	jsr		OutBcdSub			; Process B
 	tfr		E,A
 	jsr		OutBcdSub			; Process E
 	tfr		F,A
-	ldb		#$01				; B = 1 indicates to keep the last 0 in LSB
+	ldy		#$0001				; X = 1 indicates to keep the last 0
 	jsr		OutBcdSub			; Process F
-	rts
+	puls	Y,PC
 
 OutBcdSub:
 	pshs	A					; Save A for LSB
@@ -569,7 +593,7 @@ OutBcdSub:
 OutBcdSubLSB:
 	puls	A
 	anda	#$0F
-	tstb						; Check if LSB 0 is to be printed
+	cmpy	#$0000				; Check if 0 is to be printed
 	bne		OutBcdSubLSB2
 	tsta
 	beq		OutBcdSubEnd

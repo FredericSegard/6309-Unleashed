@@ -1,0 +1,47 @@
+Name     PLD5_PSG ;
+PartNo   ATF16V8B ;
+Date     2024-03-24 ;
+Revision 1.1 ;
+Designer Frederic Segard ;
+Company  MicroHobbyist ;
+Assembly None;
+Location U7 ;
+Device   G16V8 ;
+
+/* *************** INPUT PINS ************************ */
+PIN  1   = A0       ; /*                               */ 
+PIN  2   = A1       ; /*                               */ 
+PIN  3   = A2       ; /*                               */ 
+PIN  4   = A3       ; /*                               */ 
+PIN  5   = A4       ; /*                               */ 
+PIN  6   = A5       ; /*                               */ 
+PIN  7   = A6       ; /*                               */
+PIN  8   = A7       ; /*                               */
+PIN  9   = !IOREQ   ; /* IO ($FF00-$FFEF)              */ 
+PIN  11  = RW       ; /* Read/Write                    */ 
+
+/* *************** OUTPUT PINS *********************** */
+PIN  19  = BC1      ; /* AY-3-8910 #1                  */ 
+PIN  18  = BDIR1    ; /* AY-3-8910 #1                  */ 
+PIN  17  = BC2      ; /* AY-3-8910 #2                  */ 
+PIN  16  = BDIR2    ; /* AY-3-8910 #2                  */ 
+PIN  15  = BC3      ; /* AY-3-8910 #3                  */ 
+PIN  14  = BDIR3    ; /* AY-3-8910 #3                  */ 
+PIN  13  = BC4      ; /* AY-3-8910 #4                  */ 
+PIN  12  = BDIR4    ; /* AY-3-8910 #4                  */ 
+
+/* *************** EQUATIONS ************************* */
+FIELD ADDRESS = [A7..A0] ;
+
+/* *************************************************** */
+BC1      = ADDRESS:[10..11] & IOREQ & A0 ;  /* 2 bytes */
+BDIR1    = ADDRESS:[10..11] & IOREQ & !RW ; /* 2 bytes */
+
+BC2      = ADDRESS:[12..13] & IOREQ & A0 ;  /* 2 bytes */
+BDIR2    = ADDRESS:[12..13] & IOREQ & !RW ; /* 2 bytes */
+
+BC3      = ADDRESS:[14..15] & IOREQ & A0 ;  /* 2 bytes */
+BDIR3    = ADDRESS:[14..15] & IOREQ & !RW ; /* 2 bytes */
+
+BC4      = ADDRESS:[16..17] & IOREQ & A0 ;  /* 2 bytes */
+BDIR4    = ADDRESS:[16..17] & IOREQ & !RW ; /* 2 bytes */

@@ -1,0 +1,33 @@
+# Truth table
+# Exported on Fri Mar 08 08:11:29 EST 2024
+
+# Hints and Notes on Formatting:
+# * You can edit this file then import it back into Logisim!
+# * Anything after a '#' is a comment and will be ignored.
+# * Blank lines and separator lines (e.g., ~~~~~~) are ignored.
+# * Keep column names simple (no spaces, punctuation, etc.)
+# * 'Name[N..0]' indicates an N+1 bit variable, whereas
+#   'Name' by itself indicates a 1-bit variable.
+# * You can use 'x' or '-' to indicate "don't care" for both
+#   input and output bits.
+# * You can use binary (e.g., '10100011xxxx') notation or
+#   or hex (e.g., 'C3x'). Logisim will figure out which is which.
+
+MMU_EN CS CONST RW | DIR_OE RAM_W RAM_OE RAM_EN MMU_OUT MUX_EN
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  0    0    0   0  |   0      0     1      0       0      0   
+  0    0    0   1  |   0      1     0      0       0      0   
+  0    0    1   0  |   1      1     1      1       0      0   
+  0    0    1   1  |   1      1     1      1       0      0   
+  0    1    0   0  |   1      1     1      1       0      0   
+  0    1    0   1  |   1      1     1      1       0      0   
+  0    1    1   0  |   1      1     1      1       0      0   
+  0    1    1   1  |   1      1     1      1       0      0   
+  1    0    0   0  |   0      0     1      0       0      0   
+  1    0    0   1  |   0      1     0      0       0      0   
+  1    0    1   0  |   1      1     1      1       0      0   
+  1    0    1   1  |   1      1     1      1       0      0   
+  1    1    0   0  |   1      1     1      1       0      1   
+  1    1    0   1  |   1      1     1      1       0      1   
+  1    1    1   0  |   1      1     0      0       1      1   
+  1    1    1   1  |   1      1     0      0       1      1   

@@ -1,0 +1,51 @@
+%SIGNAL
+PIN   1 =  A0 
+PIN   2 =  A1 
+PIN   3 =  A2 
+PIN   4 =  A3 
+PIN   5 =  A4 
+PIN   6 =  A5 
+PIN   7 =  A6 
+PIN   8 =  A7 
+PIN  19 =  BC1 
+PIN  17 =  BC2 
+PIN  15 =  BC3 
+PIN  13 =  BC4 
+PIN  18 =  BDIR1 
+PIN  16 =  BDIR2 
+PIN  14 =  BDIR3 
+PIN  12 =  BDIR4 
+PIN   9 = !IOREQ 
+PIN  11 =  RW 
+%END
+
+%FIELD
+FIELD ADDRESS = A7,A6,A5,A4,A3,A2,A1,A0
+%END
+
+%EQUATION
+BC1 =>
+    A0 & !A1 & !A2 & !A3 & A4 & !A5 & !A6 & !A7 & !IOREQ
+
+BC2 =>
+    A0 & A1 & !A2 & !A3 & A4 & !A5 & !A6 & !A7 & !IOREQ
+
+BC3 =>
+    A0 & !A1 & A2 & !A3 & A4 & !A5 & !A6 & !A7 & !IOREQ
+
+BC4 =>
+    A0 & A1 & A2 & !A3 & A4 & !A5 & !A6 & !A7 & !IOREQ
+
+BDIR1 =>
+    !A1 & !A2 & !A3 & A4 & !A5 & !A6 & !A7 & !IOREQ & !RW
+
+BDIR2 =>
+    A1 & !A2 & !A3 & A4 & !A5 & !A6 & !A7 & !IOREQ & !RW
+
+BDIR3 =>
+    !A1 & A2 & !A3 & A4 & !A5 & !A6 & !A7 & !IOREQ & !RW
+
+BDIR4 =>
+    A1 & A2 & !A3 & A4 & !A5 & !A6 & !A7 & !IOREQ & !RW
+
+%END

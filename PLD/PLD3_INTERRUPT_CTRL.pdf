@@ -1,11 +1,11 @@
-{COMPONENT S:\GITHUB\6309 UNLEASHED\EP4 - ACIA AND PRIORITY ENCODER\PLD\PLD3_INTERRUPT_CTRL.SYM
+{COMPONENT S:\GITHUB\6309 UNLEASHED\PLD\PLD3_INTERRUPT_CTRL.SYM
 
  {ENVIRONMENT
   {PDIFvrev 3.00}
   {Program "CUPL(WM) Version 5.0a"}
   {DBtype "Schematic"}
   {DBvrev 1.01}
-  {DBtime "Wed Jan 17 12:04:30 2024 "}
+  {DBtime "Sun Feb 18 07:43:13 2024 "}
   {DBunit "MIL"}
   {DBgrid 10}
   {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
@@ -33,24 +33,24 @@
  {SYMBOL
   {PIN_DEF
    [Ly "PINCON"]
-   {P I1 {Pt "INPUT"}{Lq 0}{Ploc 100 320}}
-   {P I2 {Pt "INPUT"}{Lq 0}{Ploc 100 300}}
-   {P I3 {Pt "INPUT"}{Lq 0}{Ploc 100 280}}
-   {P I4 {Pt "INPUT"}{Lq 0}{Ploc 100 260}}
-   {P I5 {Pt "INPUT"}{Lq 0}{Ploc 100 240}}
-   {P I6 {Pt "INPUT"}{Lq 0}{Ploc 100 220}}
-   {P I7 {Pt "INPUT"}{Lq 0}{Ploc 100 200}}
-   {P I8 {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
-   {P I9 {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
-   {P I10 {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
-   {P I11 {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
-   {P I12 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
-   {P V4 {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
-   {P V1 {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
+   {P I0 {Pt "INPUT"}{Lq 0}{Ploc 100 320}}
+   {P I1 {Pt "INPUT"}{Lq 0}{Ploc 100 300}}
+   {P I2 {Pt "INPUT"}{Lq 0}{Ploc 100 280}}
+   {P I3 {Pt "INPUT"}{Lq 0}{Ploc 100 260}}
+   {P I4 {Pt "INPUT"}{Lq 0}{Ploc 100 240}}
+   {P I5 {Pt "INPUT"}{Lq 0}{Ploc 100 220}}
+   {P I6 {Pt "INPUT"}{Lq 0}{Ploc 100 200}}
+   {P I7 {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
+   {P I8 {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
+   {P I9 {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
+   {P I10 {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
+   {P I11 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
+   {P V3 {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
+   {P V0 {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
    {P FIRQ {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
    {P IRQ {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
-   {P V3 {Pt "I/O"}{Lq 0}{Ploc 280 20}}
-   {P V2 {Pt "I/O"}{Lq 0}{Ploc 280 40}}
+   {P V2 {Pt "I/O"}{Lq 0}{Ploc 280 20}}
+   {P V1 {Pt "I/O"}{Lq 0}{Ploc 280 40}}
   }
 
   {PKG
@@ -107,25 +107,25 @@
    {L 250 40 280 40}
    [Ly "PINNAM"]
    [Tj "LC"]
-   {T "I1" 140 320}
-   {T "I2" 140 300}
-   {T "I3" 140 280}
-   {T "I4" 140 260}
-   {T "I5" 140 240}
-   {T "I6" 140 220}
-   {T "I7" 140 200}
-   {T "I8" 140 180}
-   {T "I9" 140 160}
-   {T "I10" 140 140}
-   {T "I11" 140 120}
-   {T "I12" 140 100}
-   {T "V4" 140 80}
-   {T "V1" 140 60}
+   {T "I0" 140 320}
+   {T "I1" 140 300}
+   {T "I2" 140 280}
+   {T "I3" 140 260}
+   {T "I4" 140 240}
+   {T "I5" 140 220}
+   {T "I6" 140 200}
+   {T "I7" 140 180}
+   {T "I8" 140 160}
+   {T "I9" 140 140}
+   {T "I10" 140 120}
+   {T "I11" 140 100}
+   {T "V3" 140 80}
+   {T "V0" 140 60}
    {T "FIRQ" 140 40}
    {T "IRQ" 140 20}
    [Tj "RC"]
-   {T "V3" 240 20}
-   {T "V2" 240 40}
+   {T "V2" 240 20}
+   {T "V1" 240 40}
    [Ly "DEVICE"]
    [Tj "CT"]
    {T "G16V8S" 190 -10}
@@ -139,7 +139,7 @@
    {EX
     [Ly "ATTR2"]
     [Ts 12][Tj "CT"][Tr 0][Tm "N"]
-    {At PLD S:\GITHUB\6309 UNLEASHED\EP4 - ACIA AND PRIORITY ENCODER\PLD\PLD3_INTERRUPT_CTRL 190 340}
+    {At PLD S:\GITHUB\6309 UNLEASHED\PLD\PLD3_INTERRUPT_CTRL 190 340}
    }
   }
  }
@@ -149,6 +149,8 @@
   }
 
   {NET_DEF
+   {N I0
+   }
    {N I1
    }
    {N I2
@@ -171,19 +173,17 @@
    }
    {N I11
    }
-   {N I12
+   {N V3
    }
-   {N V4
-   }
-   {N V1
+   {N V0
    }
    {N FIRQ
    }
    {N IRQ
    }
-   {N V3
-   }
    {N V2
+   }
+   {N V1
    }
   }
 

@@ -1,0 +1,68 @@
+Name      PLD4_MMU ;
+PartNo    ATF22V10C ;
+Date      3/12/2024 ;
+Revision  3.3 ;
+Designer  Frederic Segard ;
+Company   MicroHobbyist ;
+Assembly  None ;
+Location  U24 ;
+Device    g22v10 ;
+
+/***************** INPUT PINS **************************************/
+PIN 1   = MMU_EN   ; /* MMU Enable ($FF90, bit 6)                  */
+PIN 2   = RW       ; /* Read/!Write signal                         */
+PIN 3   = CONST    ; /* Constant memory range ($FE00-$FFFF)        */
+PIN 4   = !IORQ    ; /* I/O select line                            */
+PIN 5   = A0       ; /* Address bus                                */
+PIN 6   = A1       ; /* Address bus                                */
+PIN 7   = A2       ; /* Address bus                                */
+PIN 8   = A3       ; /* Address bus                                */
+PIN 9   = A4       ; /* Address bus                                */
+PIN 10  = A5       ; /* Address bus                                */
+PIN 11  = A6       ; /* Address bus                                */
+PIN 13  = A7       ; /* Address bus                                */
+
+/***************** OUTPUT PINS *************************************/
+PIN 23  = BUF_OE   ; /* 74HCT245 buffer output enable pin          */
+PIN 22  = RAM_W    ; /* RAM write pin                              */
+PIN 21  = MMU_OUT  ; /* MMU output pin                             */
+PIN 20  = RAM_EN   ; /* RAM chip select pin                        */
+PIN 19  = RAM_OE   ; /* RAM output enable pin                      */
+PIN 18  = !INIT0_R ; /* Register bit-6, MMU Enable (Read)          */
+PIN 17  = !INIT0_W ; /* Register bit-6, MMU Enable (Write)         */
+PIN 16  = !INIT1_R ; /* Register bit-0, MMU Task Select (Read)     */
+PIN 15  = !INIT1_W ; /* Register bit-0, MMU Task Select (Write)    */
+PIN 14  = MMU_MUX  ; /* To MMU input multiplexer (RAM registers    */
+
+/***************** EQUATIONS ***************************************/
+FIELD ADDRESS = [A7..A0] ;
+
+/* Two latch and buffer pairs to simulate GIME registers           */
+INIT0_R = ADDRESS:[90] & IORQ &  RW ;    /* $FF90 (MMU_EN Read)    */
+INIT0_W = ADDRESS:[90] & IORQ & !RW ;    /* $FF90 (MMU_EN Write)   */
+INIT1_R = ADDRESS:[91] & IORQ &  RW ;    /* $FF91 (TASK Read)      */
+INIT1_W = ADDRESS:[91] & IORQ & !RW ;    /* $FF91 (TASK Write      */
+
+/* Only when RAM is accessed from CPU */
+BUF_OE  = CONST # !(ADDRESS:[A0..AF] & IORQ) ;
+
+/* Only when RAM is written to */
+RAM_W   = RW # CONST # !(ADDRESS:[A0..AF] & IORQ) ;
+
+/* Only when RAM is read */
+RAM_OE  = ((ADDRESS:[A0..AF] & IORQ) & CONST) #
+          (!(ADDRESS:[A0..AF] & IORQ) & !CONST) #
+          (!MMU_EN & !RW) #
+          (!MMU_EN & CONST) #
+		  ((ADDRESS:[A0..AF] & IORQ) & !RW) ;
+
+/* Anytime RAM is accessed */
+RAM_EN  = ((ADDRESS:[A0..AF] & IORQ) & CONST) #
+          (!(ADDRESS:[A0..AF] & IORQ) & !CONST) #
+          (!MMU_EN & CONST) ;
+
+/* Switches to constant RAM when CONST is active */
+MMU_OUT = MMU_EN & !(ADDRESS:[A0..AF] & IORQ) & CONST ;
+
+/* MMU input multiplexer: 0 = write to MMU RAM, 1 = Read from MMU RAM */
+MMU_MUX = MMU_EN & !(ADDRESS:[A0..AF] & IORQ) ;
