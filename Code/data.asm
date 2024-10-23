@@ -56,7 +56,7 @@ CmdList:
 	.dw		Peek				; Read a byte of memory
 	.str	"PLAY"
 	.db		EOD
-	.dw		Play				; Play a song
+	.dw		PlayCmd				; Play a song
 	.str	"POKE"
 	.db		EOD
 	.dw		Poke				; Write a byte of memory

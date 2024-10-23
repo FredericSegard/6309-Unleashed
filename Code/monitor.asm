@@ -432,7 +432,8 @@ IntTestLoop:
 	lda		IntVector			; Read the interrupt vector
 	lsra						; Shift it right
 	jsr		OutByte				; Print value of interrupt
-	jsr		Delay				; Let it stay still for a while
+	ldb		#10					; Wait for 10ms
+	jsr		Millisecond			; Let it stay still for a while
 	jsr		DelChar				; Delete the byte on screen
 	bra		IntTestLoop			; Loop until ESC
 IntTestEnd:

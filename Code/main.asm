@@ -46,7 +46,7 @@ EOD			EQU $FF				; End of data, used by some routines
 
 ; Misc
 ; ----
-RomStart	EQU	$C000			; Start of ROM
+RomStart	EQU	$A000			; Start of ROM
 ShadowBlk	EQU	$FF00-RomStart	; Shadow code block size to copy
 SysSize		EQU	256				; Size of system stack
 UsrSize		EQU 256				; Size of user stack
@@ -151,6 +151,8 @@ Warm:
 	jsr		OutBcd
 	jsr		OutStr
 
+	jsr		BootTune			; Play boot tune
+	
 	; Clears some variables
 	clr		CurrAddress
 	clr		CurrBank
@@ -191,6 +193,8 @@ MainRunExec:
 	INCLUDE	"monitor.asm"		; Monitor commands subroutines
 	INCLUDE "psg.asm"			; Programmable Sound Generator subroutines
 	INCLUDE	"data.asm"			; Text data
+	INCLUDE "mario.asm"			; Super Mario song data
+	INCLUDE "monkey.asm"		; Monkey Island song data
 
 ;  ___           _                                          _         
 ; |_ _|  _ __   | |_    ___   _ __   _ __   _   _   _ __   | |_   ___ 
@@ -271,14 +275,13 @@ TempQ1:			.ds		1		; Quad High MSB
 TempQ2:			.ds		1		; Quad Low MSB
 TempQ3:			.ds		1		; Quad High LSB
 TempQ4:			.ds		1		; Quad Low LSB
-RxBuffer		.ds		$100	; ACIA #1 receive buffer
-SndTable		.ds		2
-SndTempo		.ds		1
-SndVoice		.ds		1
-SndNoteCoarse	.ds		2
-SndNoteFine		.ds		2
-SndVolume		.ds		1
-SndDuration		.ds		1
+RxBuffer:		.ds		$100	; ACIA #1 receive buffer
+SndTempo:		.ds		1
+SndVoice:		.ds		1
+SndNoteCoarse:	.ds		1
+SndNoteFine:	.ds		1
+SndVolume:		.ds		1
+SndDuration:	.ds		1
 VarEnd:
 
 	FILL 'A',StackEnd-VarEnd	; Clear area with A's to indicate available shadow RAM

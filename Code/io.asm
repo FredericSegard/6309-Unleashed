@@ -176,28 +176,43 @@ Com1TxNotReady:
 	sta		Com1_Data			; Send out the character
 	rts
 
-;  ____           _                 
-; |  _ \    ___  | |   __ _   _   _ 
-; | | | |  / _ \ | |  / _` | | | | |
-; | |_| | |  __/ | | | (_| | | |_| |
-; |____/   \___| |_|  \__,_|  \__, |
-;                             |___/ 
+;  __  __   _   _   _   _                                           _ 
+; |  \/  | (_) | | | | (_)  ___    ___    ___    ___    _ __     __| |
+; | |\/| | | | | | | | | | / __|  / _ \  / __|  / _ \  | '_ \   / _` |
+; | |  | | | | | | | | | | \__ \ |  __/ | (__  | (_) | | | | | | (_| |
+; |_|  |_| |_| |_| |_| |_| |___/  \___|  \___|  \___/  |_| |_|  \__,_|
 ;
-; Delay Loop
-; ==========
+; Millisecond delay Loop
+; ======================
+; Input:	B = number of milliseconds to wait
+; Regs		W = Loop counter (373)
+
+; At 3 MHz, a cycle is 333.333ns. Each W loop is (2+3+3) x cycle = 2.666µs
+; Raw loop times for 1ms / 2.667 = 375 W loops theoretically, not considering B loop and overhead
+; Each B loop is (4+1+3) x cycle = 2.666µs. Subroutine overhead is (6+6+4) x cycle = 5.333µs
+;
+; 272: (falls behind)		373: (Constant & Optimal)		374: (Increases over time)
+;  - 1 = 1.000000ms			 - 1 = 1.002667ms				 - 1 = 1.005333ms
+;  - 10 = 9.976000ms		 - 10 = 10.002667ms				 - 10 = 10.029333ms
+;  - 100 = 99.736000ms		 - 100 = 100.002667ms			 - 100 = 100.269333ms
+;  - 250 = 249.336000ms		 - 250 = 250.002667ms			 - 250 = 250.669333ms
 
 	PRAGMA cc
 
-Delay:
-	pshsw
-	ldw		#$8000
-DelayLoop:
-	decw
-	beq		DelayEnd
-	bra		DelayLoop
-DelayEnd:
-	pulsw
-	rts
+Millisecond:
+	pshsw						; 6
+MillisecondBLoop:
+	ldw		#373				; 4		
+MillisecondWLoop:
+	decw						; 2
+	beq		MillisecondB		; 3
+	bra		MillisecondWLoop	; 3
+MillisecondB:
+	decb						; 1
+	bne		MillisecondBLoop	; 3
+MillisecondEnd:
+	pulsw						; 6
+	rts							; 4
 
 ;  ____           _    ____   _                    
 ; |  _ \    ___  | |  / ___| | |__     __ _   _ __ 
